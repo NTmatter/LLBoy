@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "cpu.h"
+#include "cpu_functions.h"
 
 int main(int argc, char** argv)
 {

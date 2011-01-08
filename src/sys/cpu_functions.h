@@ -47,6 +47,25 @@ CPU_OP(LDHLmr_a); CPU_OP(LDHLmr_b); CPU_OP(LDHLmr_c); CPU_OP(LDHLmr_d); CPU_OP(L
 // CPU_OP(LDrn_$to)
 CPU_OP(LDrn_a); CPU_OP(LDrn_b); CPU_OP(LDrn_c); CPU_OP(LDrn_d); CPU_OP(LDrn_e); CPU_OP(LDrn_h); CPU_OP(LDrn_l);
 
+// TODO: other load/store ops starting at LDHLmn
+
+// ---- Swap operations ---- //
+CPU_OP(SWAPr_a); CPU_OP(SWAPr_b); CPU_OP(SWAPr_c); CPU_OP(SWAPr_d); CPU_OP(SWAPr_e); CPU_OP(SWAPr_h); CPU_OP(SWAPr_l);
+
+// --- Arithmetic Ops --- //
+// ---- Addition ---- //
+// Single Register
+CPU_OP(ADDr_a); CPU_OP(ADDr_b); CPU_OP(ADDr_c); CPU_OP(ADDr_d); CPU_OP(ADDr_e); CPU_OP(ADDr_h); CPU_OP(ADDr_l);
+
+// Double Register
+CPU_OP(ADDHLBC); CPU_OP(ADDHLDE); CPU_OP(ADDHLHL);
+
+CPU_OP(ADDHLSP);
+
+// From memory
+CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
+
+
 
 #undef CPU_OP
 #endif

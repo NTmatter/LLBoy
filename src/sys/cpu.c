@@ -6,11 +6,6 @@
 #include "cpu_functions.h"
 #include "system.h"
 
-#define FLAG_ZERO 0x80
-#define FLAG_OPERATION 0x40
-#define FLAG_HALF_CARRY 0x20
-#define FLAG_CARRY 0x10
-
 #define CPU_OP(name) void cpu_op_##name(system_t* state)
 
 // -- Helper Functions -- //
@@ -161,9 +156,44 @@ LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
 #undef LDRN
 
 
+#define SWAPR(reg) CPU_OP(SWAPr_##reg) \
+{ \
+    const uint8_t val = state->cpu.registers.reg; \
+    state->cpu.registers.reg = ((val & 0xf) << 4) | (val >> 4); \
+    state->cpu.registers.m = 1; \
+}
+SWAPR(a); SWAPR(b); SWAPR(c); SWAPR(d); SWAPR(e); SWAPR(h); SWAPR(l);
+#undef SWAPR
 
-#undef FLAG_ZERO
-#undef FLAG_OPERATION
-#undef FLAG_HALF_CARRY
-#undef FLAG_CARRY
+// --- Arithmetic Ops --- //
+// ---- Addition ---- //
+// Single Register
+#define ADDR(from) CPU_OP(ADDr_##from) \
+{ \
+    const uint8_t from = state->cpu.registers.from; \
+    const uint16_t sum = state->cpu.registers.a + from; \
+    state->cpu.registers.a += from; \
+    state->cpu.registers.flags = ((sum) > 255) ? CPU_FLAG_CARRY : 0; \
+    if(state->cpu.registers.a == 0) state->cpu.registers.flags |= CPU_FLAG_ZERO; \
+    if((state->cpu.registers.a ^ state->cpu.registers.from) & 0x10) \
+        state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY; \
+    state->cpu.registers.m = 1; \
+}
+ADDR(a); ADDR(b); ADDR(c); ADDR(d); ADDR(e); ADDR(h); ADDR(l);
+#undef ADDR
+
+#define ADDHLXY(XY, x, y) CPU_OP(ADDHL##XY) \
+{ \
+    const uint32_t sum = (state->cpu.registers.h << 8) + state->cpu.registers.l \
+        + (state->cpu.registers.x << 8) + state->cpu.registers.y; \
+    state->cpu.registers.h = (sum >> 8) & 0xFF; \
+    state->cpu.registers.l = sum & 0xFF; \
+    state->cpu.registers.m = 3; \
+    if(sum > 0xFFFF) \
+        state->cpu.registers.flags |= CPU_FLAG_CARRY; \
+    else \
+        state->cpu.registers.flags &= ~CPU_FLAG_CARRY; \
+}
+ADDHLXY(BC, b, c); ADDHLXY(DE, d, e); ADDHLXY(HL, h, l);
+#undef ADDHLXY
 #undef CPU_OP

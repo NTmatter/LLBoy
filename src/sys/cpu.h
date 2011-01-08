@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define CPU_FLAG_ZERO 0x80
+#define CPU_FLAG_OPERATION 0x40
+#define CPU_FLAG_HALF_CARRY 0x20
+#define CPU_FLAG_CARRY 0x10
+
 typedef struct
 {
     bool halt;

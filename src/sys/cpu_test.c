@@ -19,5 +19,25 @@ int main(int argc, char** argv)
     
     cpu_reset(sys);
     printf("After reset: %d\n", sys->cpu.registers.m);
+    
+    // Simple addition
+    sys->cpu.registers.a = 1;
+    sys->cpu.registers.b = 2;
+    sys->cpu.registers.c = 255;
+    sys->cpu.registers.d = 14;
+    cpu_op_ADDr_b(sys);
+    printf("1 + 2 = %d with overflow %s\n",
+        sys->cpu.registers.a,
+        (sys->cpu.registers.flags & CPU_FLAG_CARRY) ? "true" : "false");
+    
+    cpu_op_ADDr_c(sys);
+    printf("3 + 255 = %d with overflow %s\n",
+        sys->cpu.registers.a,
+        (sys->cpu.registers.flags & CPU_FLAG_CARRY) ? "true" : "false");
+    
+    cpu_op_ADDr_d(sys);
+    printf("2 + 14 = %d with half-carry %s\n",
+        sys->cpu.registers.a,
+        (sys->cpu.registers.flags & CPU_FLAG_HALF_CARRY) ? "true" : "false");
     return 0;
 }

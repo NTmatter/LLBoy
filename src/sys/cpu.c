@@ -110,6 +110,58 @@ CPU_OP(halt)
     state->cpu.registers.m = 1;
 }
 
+// --- Load/Store operations --- //
+// ---- Register-to-Register ---- //
+// for to in a b c d e h l; do for from in a b c d e h l; do echo "LDRR($to,$from);"; done; done
+#define LDRR(to, from) CPU_OP(LDrr_##to##from)\
+{ \
+    state->cpu.registers.to = state->cpu.registers.from; \
+    state->cpu.registers.m = 1; \
+}
+
+LDRR(a,a); LDRR(a,b); LDRR(a,c); LDRR(a,d); LDRR(a,e); LDRR(a,h); LDRR(a,l);
+LDRR(b,a); LDRR(b,b); LDRR(b,c); LDRR(b,d); LDRR(b,e); LDRR(b,h); LDRR(b,l);
+LDRR(c,a); LDRR(c,b); LDRR(c,c); LDRR(c,d); LDRR(c,e); LDRR(c,h); LDRR(c,l);
+LDRR(d,a); LDRR(d,b); LDRR(d,c); LDRR(d,d); LDRR(d,e); LDRR(d,h); LDRR(d,l);
+LDRR(e,a); LDRR(e,b); LDRR(e,c); LDRR(e,d); LDRR(e,e); LDRR(e,h); LDRR(e,l);
+LDRR(h,a); LDRR(h,b); LDRR(h,c); LDRR(h,d); LDRR(h,e); LDRR(h,h); LDRR(h,l);
+LDRR(l,a); LDRR(l,b); LDRR(l,c); LDRR(l,d); LDRR(l,e); LDRR(l,h); LDRR(l,l);
+
+#undef LDRR
+
+// ---- Load from specified memory location ---- //
+// TODO to = mmu_read_byte(state, address);
+#define LDRHLM(to) CPU_OP(LDrHLm_##to) \
+{\
+    uint16_t address = state->cpu.registers.h << 8 + state->cpu.registers.l; \
+    state->cpu.registers.to = 255; \
+    state->cpu.registers.m = 2; \
+}
+LDRHLM(a); LDRHLM(b); LDRHLM(c); LDRHLM(d); LDRHLM(e); LDRHLM(h); LDRHLM(l);
+#undef LDRHLM
+
+// ---- Store to memory location specified by HL registers ---- //
+// TODO mmu_write_byte(state, address, state->cpu.registers.from)
+#define LDHLMR(from) CPU_OP(LDHLmr_##from)\
+{\
+    uint16_t address = state->cpu.registers.h << 8 + state->cpu.registers.l; \
+    state->cpu.registers.m = 2; \
+}
+LDHLMR(a); LDHLMR(b); LDHLMR(c); LDHLMR(d); LDHLMR(e); LDHLMR(h); LDHLMR(l);
+#undef LDHLMR
+
+// --- Load from immediate address --- //
+// TODO mmu_read_byte(state, state->cpu.registers.pc++);
+#define LDRN(to) CPU_OP(LDrn_##to) \
+{ \
+    state->cpu.registers.to = 0; \
+    state->cpu.registers.m = 2; \
+}
+LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
+#undef LDRN
+
+
+
 #undef FLAG_ZERO
 #undef FLAG_OPERATION
 #undef FLAG_HALF_CARRY

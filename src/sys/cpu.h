@@ -12,7 +12,7 @@ typedef struct
     struct
     {
         uint8_t a, b, c, d, e; // General-purpose registers
-        uint8_t h, l; // General-purpose registers (high/low byte?)
+        uint8_t h, l; // General-purpose registers (commonly for address registers)
         uint8_t m; // Cycles for last instruction
         uint8_t flags; // Flags
         uint8_t i; // ?

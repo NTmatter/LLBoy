@@ -5,5 +5,5 @@ set (LLBoy_VERSION_MAJOR 0)
 set (LLBoy_VERSION_MINOR 1)
 set (LLBoy_VERSION_MICRO 0)
 
-include_directories ()
+add_subdirectory (sys)
 add_executable (LLBoy main.cpp)

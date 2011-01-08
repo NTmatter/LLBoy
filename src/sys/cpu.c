@@ -77,6 +77,7 @@ void cpu_rrs(system_t* state)
 }
 
 /// Execute an instruction
+/// Core of Fetch/Decode/Execute loop
 /// This should probably be absorbed into the code generator
 void cpu_exec(system_t* state)
 {
@@ -85,9 +86,10 @@ void cpu_exec(system_t* state)
     // Fetch instruction from memory
     // uint8_t opcode = state->mmu.rb(state->cpu.pc++);
     // Fetch op implementation from table
-    
+    void (*op)(system_t* state) = 0;
     // execute op
-    
+    op(state);
+    state->cpu.clock.m += state->cpu.registers.m;
 }
 
 // -- Ops -- //

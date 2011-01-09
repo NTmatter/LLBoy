@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 find_package(LLVM REQUIRED)
 find_program(CLANG clang HINTS ${LLVM_ROOT_DIR} PATH_SUFFIXES bin)
 find_program(CLANGXX clang++ HINTS ${LLVM_ROOT_DIR} PATH_SUFFIXES bin)
+find_program(LLVM_LINKER llvm-ld HINTS ${LLVM_ROOT_DIR} PATH_SUFFIXES bin)
 
 set (LLBoy_VERSION_MAJOR 0)
 set (LLBoy_VERSION_MINOR 1)

@@ -4,20 +4,21 @@ project("LLBoy System Emulation")
 
 set(SYSTEM_SOURCES cpu.c system.c)
 set(SYSTEM_SOURCES_ABSOLUTE)
+
+# Find absolute paths for original sources
 foreach(SOURCEFILE ${SYSTEM_SOURCES})
-    find_file(SOURCEFILE_ABSOLUTE
+    find_file(FOUND${SOURCEFILE}
         ${SOURCEFILE}
         PATHS ${CMAKE_CURRENT_SOURCE_DIR}
         NO_DEFAULT_PATH)
-    list(APPEND SYSTEM_SOURCES_ABSOLUTE ${SOURCEFILE_ABSOLUTE})
+    list(APPEND SYSTEM_SOURCES_ABSOLUTE ${FOUND${SOURCEFILE}})
+    unset(FOUND${SOURCEFILE})
 endforeach(SOURCEFILE)
 
-message (STATUS "Converting ${SYSTEM_SOURCES} --> ${SYSTEM_SOURCES_ABSOLUTE}")
-
-# Is this doable as a module?
+# Create LLVM object files for sources
 add_custom_target(system-bitcode ALL
     COMMAND ${CLANG} -c -O4 -emit-llvm -I${CMAKE_CURRENT_SOURCE_DIR} ${SYSTEM_SOURCES_ABSOLUTE}
-    COMMENT "Creating LLVM Bitcode for loading at runtime"
+    COMMENT "Creating LLVM Bitcode objects for runtime load and optimization"
     SOURCES ${SYSTEM_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 

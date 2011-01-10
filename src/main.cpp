@@ -89,6 +89,7 @@ int main(int argc, char** argv)
     void (*ADDr_b)(system_t*) = (void (*)(system_t*)) p_ADDr_b;
     ADDr_b(state);
     cout << "Executing function 1 + 2 = " << (int)(state->cpu.registers.a) << endl;
-    
+    ADDr_b(state);
+    cout << "Executing function 3 + 2 = " << (int)(state->cpu.registers.a) << endl;
     return 0;
 }

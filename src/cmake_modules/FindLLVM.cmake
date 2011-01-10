@@ -3,19 +3,25 @@
 # http://eris.liralab.it/wiki/CMake_and_FIND_PACKAGE
 # http://www.cmake.org/cgi-bin/viewcvs.cgi/Modules/readme.txt?root=CMake&view=markup
 
-if(LLVM_ROOT_DIR)
-    message("Using LLVM Root: ${LLVM_ROOT_DIR}")
-else(LLVM_ROOT_DIR)
-    message("LLVM Root directory was unspecified")
-endif(LLVM_ROOT_DIR)
+set(LLVM_ROOT "" CACHE PATH "Root of LLVM install.")
+if(NOT EXISTS ${LLVM_ROOT}/include/llvm)
+    message(FATAL_ERROR "LLVM_ROOT (${LLVM_ROOT}) is not a valid LLVM install.")
+endif()
 
-set(LLVM_INCLUDE_DIRS ${LLVM_ROOT_DIR}/include)
-set(LLVM_LIBRARY_DIRS ${LLVM_ROOT_DIR}/lib)
+find_program(LLVM_CONFIG llvm-config PATH ${LLVM_ROOT} PATH_SUFFIXES bin)
+execute_process(COMMAND ${LLVM_CONFIG} --libdir
+    OUTPUT_VARIABLE LLVM_LIBRARY_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --includedir
+    OUTPUT_VARIABLE LLVM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --cflags
+    OUTPUT_VARIABLE LLVM_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --cxxflags
+    OUTPUT_VARIABLE LLVM_CXXFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     LLVM
-    REQUIRED_VARS LLVM_INCLUDE_DIRS LLVM_LIBRARY_DIRS LLVM_ROOT_DIR)
+    REQUIRED_VARS LLVM_INCLUDE_DIRS LLVM_LIBRARY_DIRS LLVM_ROOT)
 
 if(LLVM_FOUND)
     set(LLVM_DEFINITIONS -D__STDC_LIMIT_MACROS=1 -D__STDC_CONSTANT_MACROS=1)

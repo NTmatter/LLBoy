@@ -2,7 +2,7 @@ project("LLBoy System Emulation")
 # TODO Compile with Clang to LLVM object file 
 # clang -c -emit-llvm cpu.c -o $BUILT_PRODUCTS_DIR/cpu.o
 
-set(SYSTEM_SOURCES cpu.c system.c)
+set(SYSTEM_SOURCES cpu.c mmu.c system.c)
 set(SYSTEM_SOURCES_ABSOLUTE)
 
 # Find absolute paths for original sources

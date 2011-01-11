@@ -14,11 +14,9 @@ void cpu_hello()
     printf("Greetings from the CPU\n");
 }
 
-cpu_t* initialize_cpu()
+void cpu_initialize(cpu_t* cpu)
 {
-    cpu_t* cpu = malloc(sizeof(cpu_t));
-    bzero(cpu, sizeof(cpu_t));
-    return cpu;
+    memset(cpu, 0, sizeof(cpu_t));
 }
 
 void cpu_reset(system_t* state)

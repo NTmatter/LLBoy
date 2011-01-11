@@ -6,7 +6,8 @@
 int main(int argc, char** argv)
 {
     cpu_hello();
-    cpu_t* cpu = initialize_cpu();
+    cpu_t* cpu = (cpu_t*) malloc(sizeof(cpu_t));
+    cpu_initialize(cpu);
     cpu->registers.a = 1;
     
     void (*op)() = (void (*)()) &cpu_hello;

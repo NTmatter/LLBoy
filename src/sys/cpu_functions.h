@@ -8,8 +8,8 @@
 /// Prints a simple Hello World
 void cpu_hello();
 
-/// Returns a freshly-initialized CPU structure
-cpu_t* initialize_cpu();
+/// Initializes the contents of the provided cpu structure
+void cpu_initialize(cpu_t* cpu);
 
 void cpu_reset(system_t* state);
 

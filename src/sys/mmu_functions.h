@@ -6,15 +6,16 @@
 #include "system.h"
 #include "mmu.h"
 
-#define MMU_WRAM_SIZE 8192
-#define MMU_ERAM_SIZE 32768
-#define MMU_ZRAM_SIZE 128 // XXX 127 in the original implementation
-
 void mmu_initialize(mmu_t* mmu);
 void mmu_reset(system_t* state);
 
 /// Return a pointer to the actual location specified by the address
 uint8_t* mmu_map_address(system_t* state, uint16_t address);
+
+/// Find the offset into the memory array that corresponds to the given address,
+/// accounting for the current system state, such as being in the BIOS, or 
+/// for the currently selected ROM Bank.
+uint32_t mmu_memory_offset(system_t* state, uint16_t address);
 
 uint8_t mmu_read_byte(system_t* state, uint16_t address);
 void mmu_write_byte(system_t* state, uint16_t address, uint8_t value);

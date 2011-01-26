@@ -6,7 +6,15 @@
 
 #include "bios.h"
 
+#define MMU_BIOS_SIZE 0x100
+#define MMU_ROM_BANK_SIZE 0x4000
+#define MMU_VRAM_SIZE 0x2000
+#define MMU_WRAM_SIZE 8192
+#define MMU_ERAM_SIZE 32768
+#define MMU_ZRAM_SIZE 128 // XXX 127 in the original implementation
+
 typedef struct {
+    uint8_t* memory;
     uint8_t* rom;
     uint8_t cart_type;
     

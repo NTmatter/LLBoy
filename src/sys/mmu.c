@@ -20,7 +20,7 @@ void mmu_initialize(mmu_t* mmu)
     // This is problematic, as we need to enlarge the memory allocation to fit the banks declared
     // in the cart. See REALLOC.
     // mmu->memory = (uint8_t*) malloc(MMU_BIOS_SIZE);
-    mmu->memory = (uint8_t*) calloc(MMU_BIOS_SIZE + 0x10000 + MMU_CART_BANKS * MMU_ROM_BANK_SIZE, 1);
+    mmu->memory = (uint8_t*) calloc(MMU_BIOS_SIZE + 0x10000 + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE, 1);
     memcpy(mmu->memory, bios, MMU_BIOS_SIZE);
 }
 
@@ -79,7 +79,7 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
     } else if(addr < 0xFF0F) {
         // XXX This memory should always return zero
         return -1;
-    } else if(addr < 0xFF10) {
+    } else if(addr == 0xFF0F) {
         // The interrupt flags
         return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xFF40) {
@@ -96,6 +96,25 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
     }
     
     return -1;
+}
+
+uint8_t mmu_rb(system_t* state, uint16_t addr)
+{
+    // Handle any known zeroes in memory
+    if(addr >= 0xFEA0 && addr < 0xFF00
+        || addr >= 0xFF01 && addr < 0xFF04
+        || addr >= 0xFF08 && addr < 0xFF0F
+        || addr >= 0xFF10 && addr < 0xFF40)
+    {
+            return 0;
+    } else {
+        uint32_t index = mmu_memory_offset(state, addr);
+        if(index == -1)
+        {
+            printf("Don't know how to handle memory location 0x%04x\n", addr);
+        }
+        return state->mmu.memory[index];
+    }
 }
 
 uint8_t mmu_read_byte(system_t* state, uint16_t addr)

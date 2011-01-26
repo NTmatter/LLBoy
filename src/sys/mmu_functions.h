@@ -17,6 +17,13 @@ uint8_t* mmu_map_address(system_t* state, uint16_t address);
 /// for the currently selected ROM Bank.
 uint32_t mmu_memory_offset(system_t* state, uint16_t address);
 
+/// Reads a byte from memory at the given address
+uint8_t mmu_rb(system_t* state, uint16_t address);
+uint8_t mmu_wb(system_t* state, uint16_t address, uint8_t value);
+
+uint16_t mmu_rw(system_t* state, uint16_t address);
+uint8_t mmu_ww(system_t* state, uint16_t address, uint16_t value);
+
 uint8_t mmu_read_byte(system_t* state, uint16_t address);
 void mmu_write_byte(system_t* state, uint16_t address, uint8_t value);
 

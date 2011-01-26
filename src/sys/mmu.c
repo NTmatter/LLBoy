@@ -44,12 +44,9 @@ void mmu_reset(system_t* state)
 uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
 {
     mmu_t* mmu = &(state->mmu);
-    if(addr < MMU_BIOS_SIZE && mmu->in_bios)
+    if(mmu->in_bios && addr < MMU_BIOS_SIZE)
     {
         return addr;
-    } else if(addr == MMU_BIOS_SIZE && mmu->in_bios) {
-        mmu->in_bios = false;
-        return MMU_BIOS_SIZE + addr;
     } else if(addr < 0x4000) { // Basic ROM bank 0
         return MMU_BIOS_SIZE + addr;
     } else if(addr < 0x8000) { // Currently-selected ROM Bank
@@ -100,21 +97,23 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
 
 uint8_t mmu_rb(system_t* state, uint16_t addr)
 {
-    // Handle any known zeroes in memory
-    if(addr >= 0xFEA0 && addr < 0xFF00
-        || addr >= 0xFF01 && addr < 0xFF04
-        || addr >= 0xFF08 && addr < 0xFF0F
-        || addr >= 0xFF10 && addr < 0xFF40)
+    // Certain areas of ZRAM should always return zero
+    if(addr >= 0xFEA0 && addr < 0xFF00 || addr >= 0xFF01 && addr < 0xFF04
+        || addr >= 0xFF08 && addr < 0xFF0F || addr >= 0xFF10 && addr < 0xFF40)
     {
-            return 0;
-    } else {
-        uint32_t index = mmu_memory_offset(state, addr);
-        if(index == -1)
-        {
-            printf("Don't know how to handle memory location 0x%04x\n", addr);
-        }
-        return state->mmu.memory[index];
+        return 0;
     }
+    
+    if(state->mmu.in_bios && state->cpu.registers.pc >= 0x0100) {
+        state->mmu.in_bios = false;
+    }
+    uint32_t index = mmu_memory_offset(state, addr);
+    if(index == -1)
+    {
+        printf("Attempted to read unimplemented memory segment 0x%04x\n", addr);
+        return -1;
+    }
+    return state->mmu.memory[index];
 }
 
 uint8_t mmu_read_byte(system_t* state, uint16_t addr)

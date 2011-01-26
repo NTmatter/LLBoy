@@ -35,7 +35,7 @@ void cpu_reset(system_t* state)
     
     state->cpu.registers.m = 0;
     
-    state->cpu.registers.ime = 1;
+    state->cpu.registers.ime = true;
     
     state->cpu.clock.m = 0;
     

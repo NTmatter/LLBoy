@@ -13,6 +13,9 @@
 void mmu_initialize(mmu_t* mmu);
 void mmu_reset(system_t* state);
 
+/// Return a pointer to the actual location specified by the address
+uint8_t* mmu_map_address(system_t* state, uint16_t address);
+
 uint8_t mmu_read_byte(system_t* state, uint16_t address);
 void mmu_write_byte(system_t* state, uint16_t address, uint8_t value);
 

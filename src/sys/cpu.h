@@ -22,7 +22,7 @@ typedef struct
         uint8_t flags; // Flags
         uint8_t i; // ?
         uint8_t r; // ? & 127
-        uint8_t ime; // Interrupt Master Enable
+        bool ime; // Interrupt Master Enable
         
         uint16_t pc; // Program Counter
         uint16_t sp; // Stack Pointer

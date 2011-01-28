@@ -166,3 +166,78 @@ uint8_t mmu_read_byte(system_t* state, uint16_t addr)
         return 0;
     }
 }
+
+void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
+{
+    mmu_t* mmu = &(state->mmu);
+    
+    uint32_t index = mmu_memory_offset(state, addr);
+    if(index == -1)
+    {
+        printf("Attempted to write to unimplemented memory segment 0x%04x\n", addr);
+        return;
+    }
+    
+    if(addr < 0x2000) { // ROM Bank 0, activate external RAM
+        if(mmu->cart_type == 1)
+        {
+            mmu->mbc.ram_on = ((val & 0xF) == 0xA) ? 1 : 0;
+        }
+        return;
+    } else if(addr < 0x4000) { // ROM bank switch (1-32)
+        if(mmu->cart_type == 1)
+        {
+            // Clamp to 1-32 banks
+            val &= 0x1F;
+            if(!val) val = 1;
+            
+            // Update the lower bits of the ROM bank
+            mmu->mbc.rom_bank &= 0x60;
+            mmu->mbc.rom_bank |= val;
+            mmu->rom_offset = mmu->mbc.rom_bank * MMU_ROM_BANK_SIZE;
+        }
+        return;
+    } else if(addr < 0x6000) {
+        if(mmu->cart_type == 1)
+        {
+            mmu->mbc.ram_bank = val & 3;
+            mmu->ram_offset = mmu->mbc.ram_bank * MMU_RAM_BANK_SIZE;
+        } else {
+            mmu->mbc.rom_bank &= 0x1F;
+            mmu->mbc.rom_bank |= ((val & 3) << 5);
+            mmu->rom_offset = mmu->mbc.rom_bank * MMU_ROM_BANK_SIZE;
+        }
+        return;
+    } else if(addr < 0x8000) {
+        if(mmu->cart_type == 1)
+        {
+            mmu->mbc.mode = val & 1;
+        }
+        return;
+    } else if(addr < 0xA000) { // VRAM
+        state->mmu.memory[index] = val;
+        // TODO Trigger GPU Tile updates
+    } else if(addr < 0xC000) { // External RAM
+        // TODO Write to ERAM at suggested address, needs additional paging.
+        state->mmu.memory[index] = val; // XXX this may require changes to mmu_memory_offset
+    } else if(addr < 0xF000) { // Work RAM and Echo RAM
+        state->mmu.memory[index] = val;
+    } else if(addr < 0xFE00) { // Echo RAM
+        state->mmu.memory[index] = val;
+    } else if(addr < 0xFEA0) { // Graphics OAM modify
+        state->mmu.memory[index] = val;
+        // TODO GPU.updateoam(addr, val)
+        return;
+    } else if(addr < 0xFF00) {  // Graphics OAM update only
+        // TODO GPU.updateoam(addr, val)
+        return;
+    } else if(addr < 0xFF80) { // Joypad, timer, interrupt flags (handled by indexer)
+        state->mmu.memory[index] = val;
+    } else if(addr == 0xFFFF) {
+        mmu->iE = val;
+        return;
+    }
+    
+    // Write to memory unless explicitly consumed
+    // state->mmu.memory[index] = val;
+}

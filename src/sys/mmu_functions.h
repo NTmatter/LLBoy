@@ -19,7 +19,7 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t address);
 
 /// Reads a byte from memory at the given address
 uint8_t mmu_rb(system_t* state, uint16_t address);
-uint8_t mmu_wb(system_t* state, uint16_t address, uint8_t value);
+void mmu_wb(system_t* state, uint16_t address, uint8_t value);
 
 uint16_t mmu_rw(system_t* state, uint16_t address);
 uint8_t mmu_ww(system_t* state, uint16_t address, uint16_t value);

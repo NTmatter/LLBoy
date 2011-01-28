@@ -1,4 +1,5 @@
 To compile:
 mkdir bin
 cd bin
-cmake -DLLVM_ROOT:string=/path/to/llvm/install ../src && make
+CC=clang CXX=clang++ cmake -DLLVM_ROOT:string=/path/to/llvm/install ../src
+make all test

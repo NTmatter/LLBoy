@@ -40,5 +40,6 @@ int main(int argc, char** argv)
     printf("2 + 14 = %d with half-carry %s\n",
         sys->cpu.registers.a,
         (sys->cpu.registers.flags & CPU_FLAG_HALF_CARRY) ? "true" : "false");
+        
     return 0;
 }

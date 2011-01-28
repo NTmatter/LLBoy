@@ -1,7 +1,6 @@
 project("LLBoy System Emulation")
 # TODO Compile with Clang to LLVM object file 
 # clang -c -emit-llvm cpu.c -o $BUILT_PRODUCTS_DIR/cpu.o
-
 set(SYSTEM_SOURCES cpu.c mmu.c system.c)
 set(SYSTEM_SOURCES_ABSOLUTE)
 
@@ -30,3 +29,7 @@ target_link_libraries(llboyTest llboy_system)
 
 add_executable(mmu_test_contiguous mmu_test_contiguous.c)
 target_link_libraries(mmu_test_contiguous llboy_system)
+# Tests
+add_executable(cpu_test cpu_test.c)
+target_link_libraries(cpu_test llboy_system)
+add_test("Addition" cpu_test)

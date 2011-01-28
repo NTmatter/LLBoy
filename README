@@ -1,4 +1,4 @@
 To compile:
 mkdir bin
 cd bin
-cmake -DLLVM_ROOT_DIR:string=/path/to/llvm ../src && make
+cmake -DLLVM_ROOT:string=/path/to/llvm/install ../src && make

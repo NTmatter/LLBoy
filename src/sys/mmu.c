@@ -217,27 +217,22 @@ void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
     } else if(addr < 0xA000) { // VRAM
         state->mmu.memory[index] = val;
         // TODO Trigger GPU Tile updates
+        return;
     } else if(addr < 0xC000) { // External RAM
-        // TODO Write to ERAM at suggested address, needs additional paging.
+        // TODO Write to ERAM at suggested address, needs additional paging?
         state->mmu.memory[index] = val; // XXX this may require changes to mmu_memory_offset
-    } else if(addr < 0xF000) { // Work RAM and Echo RAM
-        state->mmu.memory[index] = val;
-    } else if(addr < 0xFE00) { // Echo RAM
-        state->mmu.memory[index] = val;
-    } else if(addr < 0xFEA0) { // Graphics OAM modify
+    } else if(addr >= 0xFE00 && addr < 0xFEA0) { // Graphics OAM modify
         state->mmu.memory[index] = val;
         // TODO GPU.updateoam(addr, val)
         return;
     } else if(addr < 0xFF00) {  // Graphics OAM update only
         // TODO GPU.updateoam(addr, val)
         return;
-    } else if(addr < 0xFF80) { // Joypad, timer, interrupt flags (handled by indexer)
-        state->mmu.memory[index] = val;
     } else if(addr == 0xFFFF) {
         mmu->iE = val;
         return;
     }
     
     // Write to memory unless explicitly consumed
-    // state->mmu.memory[index] = val;
+    state->mmu.memory[index] = val;
 }

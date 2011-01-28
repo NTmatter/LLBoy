@@ -27,3 +27,6 @@ add_library (llboy ${SYSTEM_SOURCES})
 add_library (llboy_system ${SYSTEM_SOURCES})
 add_executable(llboyTest cpu_test.c)
 target_link_libraries(llboyTest llboy_system)
+
+add_executable(mmu_test_contiguous mmu_test_contiguous.c)
+target_link_libraries(mmu_test_contiguous llboy_system)

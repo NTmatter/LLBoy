@@ -70,6 +70,11 @@ CPU_OP(ADDHLSP);
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
+// --- Comparisons --- //
+CPU_OP(CPr_a); CPU_OP(CPr_b); CPU_OP(CPr_c); CPU_OP(CPr_d);
+CPU_OP(CPr_e); CPU_OP(CPr_h); CPU_OP(CPr_l);
+
+CPU_OP(CPHL); CPU_OP(CPn);
 
 /// --- CB OPS --- ///
 CPU_OP(BIT0b); CPU_OP(BIT0c); CPU_OP(BIT0d); CPU_OP(BIT0e);
@@ -151,8 +156,8 @@ static void* cpu_ops_basic[256] = {
     // B0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(CPr_b), OP(CPr_c), OP(CPr_d), OP(CPr_e),
+    OP(CPr_h), OP(CPr_l), OP(CPHL), OP(CPr_a),
     // C0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
@@ -172,7 +177,7 @@ static void* cpu_ops_basic[256] = {
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
-    OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented)
+    OP(undefined), OP(undefined), OP(CPn), OP(unimplemented)
 };
 
 static void* cpu_ops_cb[256] = {

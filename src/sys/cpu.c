@@ -256,6 +256,54 @@ CPU_OP(RET)
     state->cpu.registers.sp += 2;
 }
 
+// -- Comparison -- //
+#define CPR(r) CPU_OP(CPr_##r)\
+{\
+    state->cpu.registers.pc++; \
+    state->cpu.registers.m = 1; \
+    const uint8_t i = state->cpu.registers.a; \
+    const uint8_t m = state->cpu.registers.r; \
+    state->cpu.registers.a -= m; \
+    state->cpu.registers.flags = CPU_FLAG_OPERATION; \
+    if(m > i) state->cpu.registers.flags |= CPU_FLAG_CARRY; \
+    if(m == i) state->cpu.registers.flags |= CPU_FLAG_ZERO; \
+    if((state->cpu.registers.a^i^m) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY; \
+}
+
+CPR(b); CPR(c); CPR(d); CPR(e); CPR(h); CPR(l); CPR(a);
+
+#undef CPR
+
+CPU_OP(CPHL)
+{
+    state->cpu.registers.pc++;
+    state->cpu.registers.m = 2;
+    const uint8_t i = state->cpu.registers.a;
+    const uint8_t m = mmu_rb(state, (state->cpu.registers.h << 8) + state->cpu.registers.l);
+    state->cpu.registers.a -= m;
+    
+    // Update Flags
+    state->cpu.registers.flags = CPU_FLAG_OPERATION;
+    if(m > i) state->cpu.registers.flags |= CPU_FLAG_CARRY;
+    if(m == i) state->cpu.registers.flags |= CPU_FLAG_ZERO;
+    if((state->cpu.registers.a^i^m) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY;
+}
+
+CPU_OP(CPn)
+{
+    state->cpu.registers.pc++;
+    state->cpu.registers.m = 2;
+    const uint8_t i = state->cpu.registers.a;
+    const uint8_t m = mmu_rb(state, state->cpu.registers.pc++);
+    state->cpu.registers.a -= m;
+    
+    // Update Flags
+    state->cpu.registers.flags = CPU_FLAG_OPERATION;
+    if(m > i) state->cpu.registers.flags |= CPU_FLAG_CARRY;
+    if(m == i) state->cpu.registers.flags |= CPU_FLAG_ZERO;
+    if((state->cpu.registers.a^i^m) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY;
+}
+
 // -- CB Ops -- //
 // --- Bit Queries --- //
 #define BITnr(n, r) CPU_OP(BIT##n##r) \

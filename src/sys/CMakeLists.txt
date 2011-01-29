@@ -34,6 +34,10 @@ add_executable(cpu_test cpu_test.c)
 target_link_libraries(cpu_test llboy_system)
 add_test("Addition" cpu_test)
 
+add_executable(cpu_test_controlflow cpu_test_controlflow.c)
+target_link_libraries(cpu_test_controlflow llboy_system)
+add_test("CpuControlFlow" cpu_test_controlflow CALLnn)
+
 add_executable(mmu_test_rw mmu_test_rw.c)
 target_link_libraries(mmu_test_rw llboy_system)
 add_test("MmuReadWrite" mmu_test_rw)

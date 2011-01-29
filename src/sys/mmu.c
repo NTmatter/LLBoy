@@ -85,8 +85,7 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
     } else if(addr < 0xFF80) { // GPU
         return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xFFFF) { // ZRAM
-        // Normally ANDed with 0x7F
-        return -1;
+        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
     } else if(addr == 0xFFFF) {
         // Normally MMU._ie
         return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;

@@ -228,5 +228,59 @@ CPU_OP(ADDHL)
     if((state->cpu.registers.a ^ augend ^ addend) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY;
 }
 
+// -- Control Flow -- //
+/// CALLnn Unconditional Branch
+CPU_OP(CALLnn)
+{
+    state->cpu.registers.pc++;
+    state->cpu.registers.m = 5;
+    
+    // Consume argument
+    const uint16_t target = mmu_rw(state, state->cpu.registers.pc);
+    state->cpu.registers.pc += 2;
+    
+    // Store return location
+    state->cpu.registers.sp -= 2;
+    mmu_ww(state, state->cpu.registers.sp, state->cpu.registers.pc);
+    
+    // Set Jump Target
+    state->cpu.registers.pc = target;
+}
 
+/// RET Unconditional Return
+CPU_OP(RET)
+{
+    state->cpu.registers.pc++;
+    state->cpu.registers.m = 3;
+    state->cpu.registers.pc = mmu_rw(state, state->cpu.registers.sp);
+    state->cpu.registers.sp += 2;
+}
+
+// -- CB Ops -- //
+// --- Bit Queries --- //
+#define BITnr(n, r) CPU_OP(BIT##n##r) \
+{ \
+    state->cpu.registers.pc += 2; \
+    state->cpu.registers.flags = \
+        (state->cpu.registers.r & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
+        state->cpu.registers.m = 2; \
+}
+#define BITnm(n) CPU_OP(BIT##n##m) \
+{ \
+    state->cpu.registers.pc += 2; \
+    const uint16_t addr = (state->cpu.registers.h << 8) + state->cpu.registers.l; \
+    state->cpu.registers.flags = \
+        (mmu_rb(state, addr) & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
+        state->cpu.registers.m = 3; \
+}
+
+#define BIT(n) \
+BITnr(n,b); BITnr(n,c); BITnr(n,d); BITnr(n,e); \
+BITnr(n,h); BITnr(n,l); BITnm(n); BITnr(n,a);
+
+BIT(0); BIT(1); BIT(2); BIT(3); BIT(4); BIT(5); BIT(6); BIT(7);
+
+#undef BITnr
+#undef BITnm
+#undef BITn
 #undef CPU_OP

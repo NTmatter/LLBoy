@@ -51,6 +51,9 @@ CPU_OP(LDrn_a); CPU_OP(LDrn_b); CPU_OP(LDrn_c); CPU_OP(LDrn_d); CPU_OP(LDrn_e); 
 
 // TODO: other load/store ops starting at LDHLmn
 
+// --- Control Flow --- //
+CPU_OP(CALLnn); CPU_OP(RET);
+
 // ---- Swap operations ---- //
 CPU_OP(SWAPr_a); CPU_OP(SWAPr_b); CPU_OP(SWAPr_c); CPU_OP(SWAPr_d); CPU_OP(SWAPr_e); CPU_OP(SWAPr_h); CPU_OP(SWAPr_l);
 
@@ -66,6 +69,25 @@ CPU_OP(ADDHLSP);
 
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
+
+
+/// --- CB OPS --- ///
+CPU_OP(BIT0b); CPU_OP(BIT0c); CPU_OP(BIT0d); CPU_OP(BIT0e);
+CPU_OP(BIT0h); CPU_OP(BIT0l); CPU_OP(BIT0m); CPU_OP(BIT0a);
+CPU_OP(BIT1b); CPU_OP(BIT1c); CPU_OP(BIT1d); CPU_OP(BIT1e);
+CPU_OP(BIT1h); CPU_OP(BIT1l); CPU_OP(BIT1m); CPU_OP(BIT1a);
+CPU_OP(BIT2b); CPU_OP(BIT2c); CPU_OP(BIT2d); CPU_OP(BIT2e);
+CPU_OP(BIT2h); CPU_OP(BIT2l); CPU_OP(BIT2m); CPU_OP(BIT2a);
+CPU_OP(BIT3b); CPU_OP(BIT3c); CPU_OP(BIT3d); CPU_OP(BIT3e);
+CPU_OP(BIT3h); CPU_OP(BIT3l); CPU_OP(BIT3m); CPU_OP(BIT3a);
+CPU_OP(BIT4b); CPU_OP(BIT4c); CPU_OP(BIT4d); CPU_OP(BIT4e);
+CPU_OP(BIT4h); CPU_OP(BIT4l); CPU_OP(BIT4m); CPU_OP(BIT4a);
+CPU_OP(BIT5b); CPU_OP(BIT5c); CPU_OP(BIT5d); CPU_OP(BIT5e);
+CPU_OP(BIT5h); CPU_OP(BIT5l); CPU_OP(BIT5m); CPU_OP(BIT5a);
+CPU_OP(BIT6b); CPU_OP(BIT6c); CPU_OP(BIT6d); CPU_OP(BIT6e);
+CPU_OP(BIT6h); CPU_OP(BIT6l); CPU_OP(BIT6m); CPU_OP(BIT6a);
+CPU_OP(BIT7b); CPU_OP(BIT7c); CPU_OP(BIT7d); CPU_OP(BIT7e);
+CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 
 #undef CPU_OP
 
@@ -134,8 +156,8 @@ static void* cpu_ops_basic[256] = {
     // C0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(RET), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(CALLnn), OP(unimplemented), OP(unimplemented),
     // D0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
@@ -175,25 +197,25 @@ static void* cpu_ops_cb[256] = {
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(undefined), OP(unimplemented),
     // 40
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(BIT0b), OP(BIT0c), OP(BIT0d), OP(BIT0e),
+    OP(BIT0h), OP(BIT0l), OP(BIT0m), OP(BIT0a),
+    OP(BIT1b), OP(BIT1c), OP(BIT1d), OP(BIT1e),
+    OP(BIT1h), OP(BIT1l), OP(BIT1m), OP(BIT1a),
     // 50
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(BIT2b), OP(BIT2c), OP(BIT2d), OP(BIT2e),
+    OP(BIT2h), OP(BIT2l), OP(BIT2m), OP(BIT2a),
+    OP(BIT3b), OP(BIT3c), OP(BIT3d), OP(BIT3e),
+    OP(BIT3h), OP(BIT3l), OP(BIT3m), OP(BIT3a),
     // 60
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(BIT4b), OP(BIT4c), OP(BIT4d), OP(BIT4e),
+    OP(BIT4h), OP(BIT4l), OP(BIT4m), OP(BIT4a),
+    OP(BIT5b), OP(BIT5c), OP(BIT5d), OP(BIT5e),
+    OP(BIT5h), OP(BIT5l), OP(BIT5m), OP(BIT5a),
     // 70
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(BIT6b), OP(BIT6c), OP(BIT6d), OP(BIT6e),
+    OP(BIT6h), OP(BIT6l), OP(BIT6m), OP(BIT6a),
+    OP(BIT7b), OP(BIT7c), OP(BIT7d), OP(BIT7e),
+    OP(BIT7h), OP(BIT7l), OP(BIT7m), OP(BIT7a),
     // 80
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),

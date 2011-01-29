@@ -20,7 +20,7 @@ typedef struct
         uint8_t a, b, c, d, e; // General-purpose registers
         uint8_t h, l; // General-purpose registers (commonly for address registers)
         uint8_t m; // Cycles for last instruction
-        uint8_t flags; // Flags
+        uint8_t flags; // Flags - http://gbdev.gg8.se/wiki/articles/CPU_Registers_and_Flags
         uint8_t i; // ?
         uint8_t r; // ? & 127
         bool ime; // Interrupt Master Enable

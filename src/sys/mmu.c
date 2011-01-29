@@ -49,19 +49,19 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
         return addr;
     } else if(addr < 0x4000) { // Basic ROM bank 0
         return MMU_BIOS_SIZE + addr;
-    } else if(addr < 0x8000) { // Currently-selected ROM Bank
+    } else if(addr < 0x8000) { // ROM Bank 1 or other
         uint32_t current_bank = 1;
-        return MMU_BIOS_SIZE + (current_bank - 1) * MMU_ROM_BANK_SIZE + addr;
+        return MMU_BIOS_SIZE + current_bank * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xA000) { // GPU VRAM
-        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
+        return MMU_BIOS_SIZE + MMU_CART_BANKS * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xC000) { // External RAM
-        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
+        return MMU_BIOS_SIZE + MMU_CART_BANKS * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xF000) { // Work RAM and Echo RAM
-        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + 0xE000 + (addr & 0x1FFF);
+        return MMU_BIOS_SIZE + MMU_CART_BANKS * MMU_ROM_BANK_SIZE + 0xC000 + (addr & 0x1FFF);
     } else if(addr < 0xFE00) { // Echo RAM
-        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + 0xE000 + (addr & 0x1FFF);
+        return MMU_BIOS_SIZE + MMU_CART_BANKS * MMU_ROM_BANK_SIZE + 0xC000 + (addr & 0x1FFF);
     } else if(addr < 0xFEA0) { // GPU OAM
-        return MMU_BIOS_SIZE + (MMU_CART_BANKS - 1) * MMU_ROM_BANK_SIZE + addr;
+        return MMU_BIOS_SIZE + MMU_CART_BANKS * MMU_ROM_BANK_SIZE + addr;
     } else if(addr < 0xFF00) {
         // XXX This memory should always return zero (?) Could be audio controls...
         return -1;
@@ -97,6 +97,10 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
 
 uint8_t mmu_rb(system_t* state, uint16_t addr)
 {
+    if(state->mmu.in_bios && state->cpu.registers.pc >= 0x0100) {
+        state->mmu.in_bios = false;
+    }
+    
     // Certain areas of ZRAM should always return zero
     if(addr >= 0xFEA0 && addr < 0xFF00 || addr >= 0xFF01 && addr < 0xFF04
         || addr >= 0xFF08 && addr < 0xFF0F || addr >= 0xFF10 && addr < 0xFF40)
@@ -104,9 +108,6 @@ uint8_t mmu_rb(system_t* state, uint16_t addr)
         return 0;
     }
     
-    if(state->mmu.in_bios && state->cpu.registers.pc >= 0x0100) {
-        state->mmu.in_bios = false;
-    }
     uint32_t index = mmu_memory_offset(state, addr);
     if(index == -1)
     {
@@ -118,7 +119,7 @@ uint8_t mmu_rb(system_t* state, uint16_t addr)
 
 uint16_t mmu_rw(system_t* state, uint16_t addr)
 {
-    return mmu_rb(state, addr) + mmu_rb(state, addr + 1) << 8;
+    return mmu_rb(state, addr) + (mmu_rb(state, addr + 1) << 8);
 }
 
 void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
@@ -175,7 +176,9 @@ void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
     } else if(addr < 0xC000) { // External RAM
         // TODO Write to ERAM at suggested address, needs additional paging?
         state->mmu.memory[index] = val; // XXX this may require changes to mmu_memory_offset
-    } else if(addr >= 0xFE00 && addr < 0xFEA0) { // Graphics OAM modify
+    } else if(addr < 0xFE00) {
+        state->mmu.memory[index] = val;
+    } else if(addr < 0xFEA0) { // Graphics OAM modify
         state->mmu.memory[index] = val;
         // TODO GPU.updateoam(addr, val)
         return;

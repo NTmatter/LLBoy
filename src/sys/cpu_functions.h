@@ -24,6 +24,8 @@ void cpu_rrs(system_t* state);
 /// Handler for unknown opcodes
 void cpu_op_undefined(system_t* state);
 
+/// Handler for opcodes that exist but have not been implemented
+void cpu_op_unimplemented(system_t* state);
 CPU_OP(nop);
 CPU_OP(halt);
 
@@ -65,7 +67,171 @@ CPU_OP(ADDHLSP);
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
+static void* cpu_ops_basic[256] = {
+    // 00
+    cpu_op_nop, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 10
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 20
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 30
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 40
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 50
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 60
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 70
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_halt, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 80
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 90
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // A0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // B0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // C0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // D0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
+    cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
+    // E0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
+    cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
+    cpu_op_undefined, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
+    // F0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_undefined, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented
+    };
 
+static void* cpu_ops_cb[256] = {
+    // 00
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 10
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 20
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    // 30
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    // 40
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 50
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 60
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 70
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 80
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // 90
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // A0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // B0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // C0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // D0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // E0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    // F0
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented
+    };
 
 #undef CPU_OP
 #endif

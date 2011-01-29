@@ -22,11 +22,5 @@ uint8_t mmu_rb(system_t* state, uint16_t address);
 void mmu_wb(system_t* state, uint16_t address, uint8_t value);
 
 uint16_t mmu_rw(system_t* state, uint16_t address);
-uint8_t mmu_ww(system_t* state, uint16_t address, uint16_t value);
-
-uint8_t mmu_read_byte(system_t* state, uint16_t address);
-void mmu_write_byte(system_t* state, uint16_t address, uint8_t value);
-
-uint16_t mmu_read_word(system_t* state, uint16_t address);
-void mmu_write_word(system_t* state, uint16_t address, uint16_t value);
+void mmu_ww(system_t* state, uint16_t address, uint16_t value);
 #endif

@@ -116,55 +116,9 @@ uint8_t mmu_rb(system_t* state, uint16_t addr)
     return state->mmu.memory[index];
 }
 
-uint8_t mmu_read_byte(system_t* state, uint16_t addr)
+uint16_t mmu_rw(system_t* state, uint16_t addr)
 {
-    mmu_t* mmu = &(state->mmu);
-    if(mmu->in_bios)
-    {
-        if(addr < 0x0100)
-        {
-            return bios[addr];
-        } else if(state->cpu.registers.pc >= 0x0100) {
-            mmu->in_bios = false;
-        }
-    }
-    
-    if(addr < 0x4000)
-    {
-        return mmu->rom[addr];
-    } else if(addr < 0x8000) {
-        return mmu->rom[addr & 0x3FFF + mmu->rom_offset];
-    } else if(addr < 0xA000) {
-        return 0; // TODO return &gpu->vram[addr & 0x1FFF];
-    } else if(addr < 0xC000) {
-        return mmu->eram[addr & 0x1FFF + mmu->ram_offset];
-    } else if(addr < 0xF000) {
-        return mmu->wram[addr & 0x1FFF];
-    } else if(addr < 0xFF00) {
-        // OAM
-        // return ((addr & 0xFF) < 0xA0) ? 0 /* &gpu->oam[addr & 0xFF]*/ : 0;
-        return 0;
-    } else if(addr == 0xFFFF) {
-        return mmu->iE;
-    } else if(addr > 0xFF7F) {
-        return mmu->zram[addr & 0x7F];
-    } else if(addr == 0xFF00){
-        return 0; // state->key.rb();
-    } else if(addr < 0xFF04) {
-        return 0;
-    } else if(addr < 0xFF08) {
-        return 0; // state->timer.rb(addr)
-    } else if(addr < 0xFF15) {
-        return 0;
-    } else if(addr == 0xFF15) {
-        return mmu->iF;
-    } else if(addr < 0xFF40) {
-        return 0;
-    } else if(addr < 0xFF80) {
-        return 0; // state->gpu.rb(addr);
-    } else {
-        return 0;
-    }
+    return mmu_rb(state, addr) + mmu_rb(state, addr + 1) << 8;
 }
 
 void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
@@ -235,4 +189,10 @@ void mmu_wb(system_t* state, uint16_t addr, uint8_t val)
     
     // Write to memory unless explicitly consumed
     state->mmu.memory[index] = val;
+}
+
+void mmu_ww(system_t* state, uint16_t addr, uint16_t val)
+{
+    mmu_wb(state, addr, val & 0xFF);
+    mmu_wb(state, addr + 1, val >> 8);
 }

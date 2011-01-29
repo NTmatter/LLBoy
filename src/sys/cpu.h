@@ -14,6 +14,7 @@ typedef struct
     bool halt;
     bool stop;
     
+    // TODO Registers should be moved into parent struct for brevity
     struct
     {
         uint8_t a, b, c, d, e; // General-purpose registers

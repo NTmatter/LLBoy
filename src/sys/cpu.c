@@ -4,6 +4,7 @@
 
 #include "cpu.h"
 #include "cpu_functions.h"
+#include "mmu_functions.h"
 #include "system.h"
 
 #define CPU_OP(name) void cpu_op_##name(system_t* state)
@@ -94,11 +95,13 @@ void cpu_op_undefined(system_t* state)
 
 CPU_OP(nop)
 {
+    state->cpu.registers.pc++;
     state->cpu.registers.m = 1;
 }
 
 CPU_OP(halt)
 {
+    state->cpu.registers.pc++;
     state->cpu.halt = true;
     state->cpu.registers.m = 1;
 }
@@ -108,6 +111,7 @@ CPU_OP(halt)
 // for to in a b c d e h l; do for from in a b c d e h l; do echo "LDRR($to,$from);"; done; done
 #define LDRR(to, from) CPU_OP(LDrr_##to##from)\
 { \
+    state->cpu.registers.pc++; \
     state->cpu.registers.to = state->cpu.registers.from; \
     state->cpu.registers.m = 1; \
 }
@@ -123,31 +127,34 @@ LDRR(l,a); LDRR(l,b); LDRR(l,c); LDRR(l,d); LDRR(l,e); LDRR(l,h); LDRR(l,l);
 #undef LDRR
 
 // ---- Load from specified memory location ---- //
-// TODO to = mmu_read_byte(state, address);
 #define LDRHLM(to) CPU_OP(LDrHLm_##to) \
 {\
+    state->cpu.registers.pc++; \
     uint16_t address = state->cpu.registers.h << 8 + state->cpu.registers.l; \
-    state->cpu.registers.to = 255; \
+    state->cpu.registers.to = mmu_rb(state, address); \
     state->cpu.registers.m = 2; \
 }
 LDRHLM(a); LDRHLM(b); LDRHLM(c); LDRHLM(d); LDRHLM(e); LDRHLM(h); LDRHLM(l);
 #undef LDRHLM
 
 // ---- Store to memory location specified by HL registers ---- //
-// TODO mmu_write_byte(state, address, state->cpu.registers.from)
 #define LDHLMR(from) CPU_OP(LDHLmr_##from)\
 {\
+    state->cpu.registers.pc++; \
     uint16_t address = state->cpu.registers.h << 8 + state->cpu.registers.l; \
+    mmu_wb(state, address, state->cpu.registers.from); \
     state->cpu.registers.m = 2; \
 }
 LDHLMR(a); LDHLMR(b); LDHLMR(c); LDHLMR(d); LDHLMR(e); LDHLMR(h); LDHLMR(l);
 #undef LDHLMR
 
 // --- Load from immediate address --- //
-// TODO mmu_read_byte(state, state->cpu.registers.pc++);
+// TODO Immediate-mode version with values embedded in function call
 #define LDRN(to) CPU_OP(LDrn_##to) \
 { \
-    state->cpu.registers.to = 0; \
+    state->cpu.registers.pc++; \
+    uint16_t address = mmu_rb(state, state->cpu.registers.pc++) << 8 + mmu_rb(state, state->cpu.registers.pc++); \
+    state->cpu.registers.to = mmu_rb(state, address); \
     state->cpu.registers.m = 2; \
 }
 LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
@@ -156,6 +163,7 @@ LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
 
 #define SWAPR(reg) CPU_OP(SWAPr_##reg) \
 { \
+    state->cpu.registers.pc++; \
     const uint8_t val = state->cpu.registers.reg; \
     state->cpu.registers.reg = ((val & 0xf) << 4) | (val >> 4); \
     state->cpu.registers.m = 1; \
@@ -168,6 +176,7 @@ SWAPR(a); SWAPR(b); SWAPR(c); SWAPR(d); SWAPR(e); SWAPR(h); SWAPR(l);
 // Single Register
 #define ADDR(from) CPU_OP(ADDr_##from) \
 { \
+    state->cpu.registers.pc++; \
     const uint8_t from = state->cpu.registers.from; \
     const uint16_t sum = state->cpu.registers.a + from; \
     state->cpu.registers.a += from; \
@@ -182,6 +191,7 @@ ADDR(a); ADDR(b); ADDR(c); ADDR(d); ADDR(e); ADDR(h); ADDR(l);
 
 #define ADDHLXY(XY, x, y) CPU_OP(ADDHL##XY) \
 { \
+    state->cpu.registers.pc++; \
     const uint32_t sum = (state->cpu.registers.h << 8) + state->cpu.registers.l \
         + (state->cpu.registers.x << 8) + state->cpu.registers.y; \
     state->cpu.registers.h = (sum >> 8) & 0xFF; \
@@ -192,6 +202,23 @@ ADDR(a); ADDR(b); ADDR(c); ADDR(d); ADDR(e); ADDR(h); ADDR(l);
     else \
         state->cpu.registers.flags &= ~CPU_FLAG_CARRY; \
 }
+// XXX Is this missing parts of its Flags update?
 ADDHLXY(BC, b, c); ADDHLXY(DE, d, e); ADDHLXY(HL, h, l);
 #undef ADDHLXY
+
+CPU_OP(ADDHL)
+{
+    state->cpu.registers.pc++;
+    const uint16_t addr = (state->cpu.registers.h << 8) + state->cpu.registers.l;
+    const uint8_t augend = state->cpu.registers.a;
+    const uint8_t addend = mmu_rb(state, addr);
+    const uint16_t sum = augend + addend;
+    state->cpu.registers.a += addend;
+    
+    state->cpu.registers.m = 2;
+    state->cpu.registers.flags = 0;
+    if(sum > 0xFF) state->cpu.registers.flags |= CPU_FLAG_CARRY;
+    if(state->cpu.registers.a == 0) state->cpu.registers.flags |= CPU_FLAG_ZERO;
+    if((state->cpu.registers.a ^ augend ^ addend) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY;
+}
 #undef CPU_OP

@@ -67,6 +67,8 @@ CPU_OP(ADDHLSP);
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
+#undef CPU_OP
+
 static void* cpu_ops_basic[256] = {
     // 00
     cpu_op_nop, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
@@ -148,7 +150,7 @@ static void* cpu_ops_basic[256] = {
     cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
     cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
     cpu_op_undefined, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented
-    };
+};
 
 static void* cpu_ops_cb[256] = {
     // 00
@@ -231,7 +233,5 @@ static void* cpu_ops_cb[256] = {
     cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
     cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
     cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented
-    };
-
-#undef CPU_OP
+};
 #endif

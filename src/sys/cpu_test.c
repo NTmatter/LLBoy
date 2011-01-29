@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     op();
     
     system_t* sys = initialize_system();
-    void (*nop)(system_t*) = (void (*)(system_t*)) &cpu_op_nop;
+    void (*nop)(system_t*) = (void (*)(system_t*)) &cpu_op_NOP;
     nop(sys);
     printf("CPU's last instruction time: %d\n", sys->cpu.registers.m);
     

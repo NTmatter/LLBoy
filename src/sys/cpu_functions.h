@@ -22,12 +22,12 @@ void cpu_rrs(system_t* state);
 // -- Ops -- //
 
 /// Handler for unknown opcodes
-void cpu_op_undefined(system_t* state);
+CPU_OP(undefined);
 
 /// Handler for opcodes that exist but have not been implemented
-void cpu_op_unimplemented(system_t* state);
-CPU_OP(nop);
-CPU_OP(halt);
+CPU_OP(unimplemented);
+CPU_OP(NOP);
+CPU_OP(HALT);
 
 // --- Load/Store operations --- //
 // ---- Register-to-Register ---- //
@@ -69,169 +69,171 @@ CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
 #undef CPU_OP
 
+#define OP(opname) cpu_op_##opname
 static void* cpu_ops_basic[256] = {
     // 00
-    cpu_op_nop, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(NOP), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(ADDHLBC), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 10
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(ADDHLDE), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 20
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(ADDHLHL), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 30
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 40
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(LDrr_bb), OP(LDrr_bc), OP(LDrr_bd), OP(LDrr_be),
+    OP(LDrr_bh), OP(LDrr_bl), OP(LDrHLm_b), OP(LDrr_ba),
+    OP(LDrr_cb), OP(LDrr_cc), OP(LDrr_cd), OP(LDrr_ce),
+    OP(LDrr_ch), OP(LDrr_cl), OP(LDrHLm_c), OP(LDrr_ca),
     // 50
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(LDrr_db), OP(LDrr_dc), OP(LDrr_dd), OP(LDrr_de),
+    OP(LDrr_dh), OP(LDrr_dl), OP(LDrHLm_d), OP(LDrr_da),
+    OP(LDrr_eb), OP(LDrr_ec), OP(LDrr_ed), OP(LDrr_ee),
+    OP(LDrr_eh), OP(LDrr_el), OP(LDrHLm_e), OP(LDrr_ea),
     // 60
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(LDrr_hb), OP(LDrr_hc), OP(LDrr_hd), OP(LDrr_he),
+    OP(LDrr_hh), OP(LDrr_hl), OP(LDrHLm_h), OP(LDrr_ha),
+    OP(LDrr_lb), OP(LDrr_lc), OP(LDrr_ld), OP(LDrr_le),
+    OP(LDrr_lh), OP(LDrr_ll), OP(LDrHLm_l), OP(LDrr_ll),
     // 70
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_halt, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(LDHLmr_b), OP(LDHLmr_c), OP(LDHLmr_d), OP(LDHLmr_e),
+    OP(LDHLmr_h), OP(LDHLmr_l), OP(HALT), OP(LDHLmr_a),
+    OP(LDrr_ab), OP(LDrr_ac), OP(LDrr_ad), OP(LDrr_ae),
+    OP(LDrr_ah), OP(LDrr_al), OP(LDrHLm_a), OP(LDrr_aa),
     // 80
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(ADDr_b), OP(ADDr_c), OP(ADDr_d), OP(ADDr_e),
+    OP(ADDr_h), OP(ADDr_l), OP(ADDHL), OP(ADDr_a),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 90
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // A0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // B0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // C0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // D0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
-    cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     // E0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
-    cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined,
-    cpu_op_undefined, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented),
     // F0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_undefined, cpu_op_undefined, cpu_op_unimplemented, cpu_op_unimplemented
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
+    OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented)
 };
 
 static void* cpu_ops_cb[256] = {
     // 00
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 10
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 20
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(undefined), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(undefined), OP(unimplemented),
     // 30
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_undefined, cpu_op_unimplemented,
+    OP(SWAPr_b), OP(SWAPr_c), OP(SWAPr_d), OP(SWAPr_e),
+    OP(SWAPr_h), OP(SWAPr_l), OP(undefined), OP(SWAPr_a),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(undefined), OP(unimplemented),
     // 40
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 50
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 60
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 70
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 80
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 90
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // A0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // B0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // C0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // D0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // E0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // F0
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented,
-    cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented, cpu_op_unimplemented
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented)
 };
+#undef OP
 #endif

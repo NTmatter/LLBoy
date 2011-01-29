@@ -76,7 +76,7 @@ void cpu_rrs(system_t* state)
 void cpu_exec(system_t* state)
 {
     state->cpu.registers.r++;
-    state->cpu.registers.r &= 127;
+    state->cpu.registers.r &= 0x7F; 
     // Fetch instruction from memory
     // uint8_t opcode = state->mmu.rb(state->cpu.pc++);
     // Fetch op implementation from table
@@ -89,17 +89,24 @@ void cpu_exec(system_t* state)
 // -- Ops -- //
 void cpu_op_undefined(system_t* state)
 {
-    printf("Hit unimplemented or unknown instruction $%x", state->cpu.registers.pc);
+    printf("Hit unknown instruction $%x", state->cpu.registers.pc);
     state->cpu.stop = true;
 }
 
-CPU_OP(nop)
+void cpu_op_unimplemented(system_t* state)
+{
+    printf("Hit unimplemented instruction 0x%02x at 0x%04x\n",
+        mmu_rb(state, state->cpu.registers.pc), state->cpu.registers.pc);
+    state->cpu.halt = true;
+}
+
+CPU_OP(NOP)
 {
     state->cpu.registers.pc++;
     state->cpu.registers.m = 1;
 }
 
-CPU_OP(halt)
+CPU_OP(HALT)
 {
     state->cpu.registers.pc++;
     state->cpu.halt = true;
@@ -202,7 +209,6 @@ ADDR(a); ADDR(b); ADDR(c); ADDR(d); ADDR(e); ADDR(h); ADDR(l);
     else \
         state->cpu.registers.flags &= ~CPU_FLAG_CARRY; \
 }
-// XXX Is this missing parts of its Flags update?
 ADDHLXY(BC, b, c); ADDHLXY(DE, d, e); ADDHLXY(HL, h, l);
 #undef ADDHLXY
 
@@ -221,4 +227,6 @@ CPU_OP(ADDHL)
     if(state->cpu.registers.a == 0) state->cpu.registers.flags |= CPU_FLAG_ZERO;
     if((state->cpu.registers.a ^ augend ^ addend) & 0x10) state->cpu.registers.flags |= CPU_FLAG_HALF_CARRY;
 }
+
+
 #undef CPU_OP

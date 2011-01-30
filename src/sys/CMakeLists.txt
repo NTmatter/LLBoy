@@ -24,15 +24,15 @@ add_custom_target(system-bitcode ALL
 
 add_library (llboy ${SYSTEM_SOURCES})
 add_library (llboy_system ${SYSTEM_SOURCES})
-add_executable(llboyTest cpu_test.c)
-target_link_libraries(llboyTest llboy_system)
 
-add_executable(mmu_test_contiguous mmu_test_contiguous.c)
-target_link_libraries(mmu_test_contiguous llboy_system)
 # Tests
-add_executable(cpu_test cpu_test.c)
-target_link_libraries(cpu_test llboy_system)
-add_test("Addition" cpu_test)
+add_executable(cpu_test_basic cpu_test_basic.c)
+target_link_libraries(cpu_test_basic llboy_system)
+add_test("CpuBasics" cpu_test_basic)
+
+add_executable(cpu_test_arithmetic cpu_test_arithmetic.c)
+target_link_libraries(cpu_test_arithmetic llboy_system)
+add_test("CpuArithmetic" cpu_test_arithmetic)
 
 add_executable(cpu_test_controlflow cpu_test_controlflow.c)
 target_link_libraries(cpu_test_controlflow llboy_system)
@@ -47,6 +47,10 @@ target_link_libraries(cpu_test_bit llboy_system)
 add_test("CpuBitOps" cpu_test_bit)
 
 # MMU Tests
+add_executable(mmu_test_contiguous mmu_test_contiguous.c)
+target_link_libraries(mmu_test_contiguous llboy_system)
+add_test("MmuRegions" mmu_test_contiguous)
+
 add_executable(mmu_test_rw mmu_test_rw.c)
 target_link_libraries(mmu_test_rw llboy_system)
 add_test("MmuReadWrite" mmu_test_rw)

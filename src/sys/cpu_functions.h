@@ -79,6 +79,11 @@ CPU_OP(ADDHLSP);
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
 // ---- Increment ---- //
+CPU_OP(INCBC); CPU_OP(INCDE); CPU_OP(INCDE); CPU_OP(INCHL); CPU_OP(INCSP);
+
+CPU_OP(INCr_a); CPU_OP(INCr_b); CPU_OP(INCr_c); CPU_OP(INCr_d);
+CPU_OP(INCr_e); CPU_OP(INCr_h); CPU_OP(INCr_l); CPU_OP(INCHLm);
+
 // ---- Decrement ---- //
 CPU_OP(DECBC); CPU_OP(DECDE); CPU_OP(DECDE); CPU_OP(DECHL); CPU_OP(DECSP);
 
@@ -114,25 +119,25 @@ CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 #define OP(opname) cpu_op_##opname
 static void* cpu_ops_basic[256] = {
     // 00
-    OP(NOP), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(DECr_b), OP(unimplemented), OP(unimplemented),
+    OP(NOP), OP(unimplemented), OP(unimplemented), OP(INCBC),
+    OP(INCr_b), OP(DECr_b), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(ADDHLBC), OP(unimplemented), OP(DECBC),
-    OP(unimplemented), OP(DECr_c), OP(unimplemented), OP(unimplemented),
+    OP(INCr_c), OP(DECr_c), OP(unimplemented), OP(unimplemented),
     // 10
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(DECr_d), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(INCDE),
+    OP(INCr_d), OP(DECr_d), OP(unimplemented), OP(unimplemented),
     OP(JRn), OP(ADDHLDE), OP(unimplemented), OP(DECDE),
-    OP(unimplemented), OP(DECr_e), OP(unimplemented), OP(unimplemented),
+    OP(INCr_e), OP(DECr_e), OP(unimplemented), OP(unimplemented),
     // 20
-    OP(JRNZn), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(DECr_h), OP(unimplemented), OP(unimplemented),
+    OP(JRNZn), OP(unimplemented), OP(unimplemented), OP(INCHL),
+    OP(INCr_h), OP(DECr_h), OP(unimplemented), OP(unimplemented),
     OP(JRZn), OP(ADDHLHL), OP(unimplemented), OP(DECHL),
-    OP(unimplemented), OP(DECr_l), OP(unimplemented), OP(unimplemented),
+    OP(INCr_l), OP(DECr_l), OP(unimplemented), OP(unimplemented),
     // 30
-    OP(JRNCn), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(DECHLm), OP(unimplemented), OP(unimplemented),
+    OP(JRNCn), OP(unimplemented), OP(unimplemented), OP(INCSP),
+    OP(INCHLm), OP(DECHLm), OP(unimplemented), OP(unimplemented),
     OP(JRCn), OP(unimplemented), OP(unimplemented), OP(DECSP),
-    OP(unimplemented), OP(DECr_a), OP(unimplemented), OP(unimplemented),
+    OP(INCr_a), OP(DECr_a), OP(unimplemented), OP(unimplemented),
     // 40
     OP(LDrr_bb), OP(LDrr_bc), OP(LDrr_bd), OP(LDrr_be),
     OP(LDrr_bh), OP(LDrr_bl), OP(LDrHLm_b), OP(LDrr_ba),

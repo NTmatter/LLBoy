@@ -228,6 +228,43 @@ CPU_OP(ADDHL)
     if((state->cpu.a ^ augend ^ addend) & 0x10) state->cpu.flags |= CPU_FLAG_HALF_CARRY;
 }
 
+// ---- Increment ---- //
+#define INC(X, Y, x, y) CPU_OP(INC##X##Y) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 1; \
+    state->cpu.y++; \
+    if(!state->cpu.y) state->cpu.x++; \
+}
+INC(B, C, b, c); INC(D, E, d, e); INC(H, L, h, l);
+#undef INC
+CPU_OP(INCSP)
+{
+    state->cpu.pc++;
+    state->cpu.m = 1;
+    state->cpu.sp++;
+}
+
+#define INCR(r) CPU_OP(INCr_##r) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 1; \
+    state->cpu.r++; \
+    state->cpu.flags = (state->cpu.r ? 0 : CPU_FLAG_ZERO); \
+}
+INCR(a); INCR(b); INCR(c); INCR(d); INCR(e); INCR(h); INCR(l);
+#undef INCR
+
+CPU_OP(INCHLm)
+{
+    state->cpu.pc++;
+    state->cpu.m = 3;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    const uint8_t i = mmu_rb(state, addr) + 1;
+    mmu_wb(state, addr, i);
+    state->cpu.flags = (i ? 0 : CPU_FLAG_ZERO);
+}
+
 // ---- Decrement ---- //
 #define DEC(X, Y, x, y) CPU_OP(DEC##X##Y) \
 { \

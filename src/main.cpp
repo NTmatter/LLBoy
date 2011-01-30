@@ -84,12 +84,12 @@ int main(int argc, char** argv)
     }
     
     system_t* state = (system_t*) malloc(sizeof(system_t));
-    state->cpu.registers.a = 1;
-    state->cpu.registers.b = 2;
+    state->cpu.a = 1;
+    state->cpu.b = 2;
     void (*ADDr_b)(system_t*) = (void (*)(system_t*)) p_ADDr_b;
     ADDr_b(state);
-    cout << "Executing function 1 + 2 = " << (int)(state->cpu.registers.a) << endl;
+    cout << "Executing function 1 + 2 = " << (int)(state->cpu.a) << endl;
     ADDr_b(state);
-    cout << "Executing function 3 + 2 = " << (int)(state->cpu.registers.a) << endl;
+    cout << "Executing function 3 + 2 = " << (int)(state->cpu.a) << endl;
     return 0;
 }

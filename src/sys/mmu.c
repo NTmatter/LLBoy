@@ -96,7 +96,7 @@ uint32_t mmu_memory_offset(system_t* state, uint16_t addr)
 
 uint8_t mmu_rb(system_t* state, uint16_t addr)
 {
-    if(state->mmu.in_bios && state->cpu.registers.pc >= 0x0100) {
+    if(state->mmu.in_bios && state->cpu.pc >= 0x0100) {
         state->mmu.in_bios = false;
     }
     

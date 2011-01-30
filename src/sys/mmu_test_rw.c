@@ -23,7 +23,7 @@ int main (int argc, char const *argv[])
     // Transition out of BIOS
     printf("Leaving BIOS\n");
     assert(mmu_memory_offset(state, 0x0000) == 0x0);
-    state->cpu.registers.pc = 0x100;
+    state->cpu.pc = 0x100;
     assert(mmu_memory_offset(state, 0x0000) == 0x0); // Read must occur
     assert(mmu_rb(state, 0x0000) == 0x10); // Force the read
     assert(mmu_memory_offset(state, 0x0000) == 0x100);

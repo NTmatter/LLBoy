@@ -31,7 +31,6 @@ CPU_OP(HALT);
 
 // --- Load/Store operations --- //
 // ---- Register-to-Register ---- //
-// for to in a b c d e h l; do for from in a b c d e h l; do echo "CPU_OP(LDrr_$to$from);"; done; done
 CPU_OP(LDrr_aa); CPU_OP(LDrr_ab); CPU_OP(LDrr_ac); CPU_OP(LDrr_ad); CPU_OP(LDrr_ae); CPU_OP(LDrr_ah); CPU_OP(LDrr_al);
 CPU_OP(LDrr_ba); CPU_OP(LDrr_bb); CPU_OP(LDrr_bc); CPU_OP(LDrr_bd); CPU_OP(LDrr_be); CPU_OP(LDrr_bh); CPU_OP(LDrr_bl);
 CPU_OP(LDrr_ca); CPU_OP(LDrr_cb); CPU_OP(LDrr_cc); CPU_OP(LDrr_cd); CPU_OP(LDrr_ce); CPU_OP(LDrr_ch); CPU_OP(LDrr_cl);
@@ -52,7 +51,16 @@ CPU_OP(LDrn_a); CPU_OP(LDrn_b); CPU_OP(LDrn_c); CPU_OP(LDrn_d); CPU_OP(LDrn_e); 
 // TODO: other load/store ops starting at LDHLmn
 
 // --- Control Flow --- //
-CPU_OP(CALLnn); CPU_OP(RET);
+// ---- Function Calls ---- //
+CPU_OP(CALLnn);
+
+// ---- Function Returns ---- //
+CPU_OP(RET); CPU_OP(RETNZ); CPU_OP(RETZ); CPU_OP(RETNC); CPU_OP(RETC);
+
+// ---- Absolute Jumps ---- //
+CPU_OP(JPnn); CPU_OP(JPCnn); CPU_OP(JPNCnn); CPU_OP(JPZnn); CPU_OP(JPNZnn); CPU_OP(JPHL);
+// ---- Relative Jumps ---- //
+CPU_OP(JRn); CPU_OP(JRCn); CPU_OP(JRNCn); CPU_OP(JRZn); CPU_OP(JRNZn);
 
 // ---- Swap operations ---- //
 CPU_OP(SWAPr_a); CPU_OP(SWAPr_b); CPU_OP(SWAPr_c); CPU_OP(SWAPr_d); CPU_OP(SWAPr_e); CPU_OP(SWAPr_h); CPU_OP(SWAPr_l);
@@ -70,13 +78,20 @@ CPU_OP(ADDHLSP);
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
+// ---- Increment ---- //
+// ---- Decrement ---- //
+CPU_OP(DECBC); CPU_OP(DECDE); CPU_OP(DECDE); CPU_OP(DECHL); CPU_OP(DECSP);
+
+CPU_OP(DECr_a); CPU_OP(DECr_b); CPU_OP(DECr_c); CPU_OP(DECr_d);
+CPU_OP(DECr_e); CPU_OP(DECr_h); CPU_OP(DECr_l); CPU_OP(DECHLm);
+
 // --- Comparisons --- //
 CPU_OP(CPr_a); CPU_OP(CPr_b); CPU_OP(CPr_c); CPU_OP(CPr_d);
 CPU_OP(CPr_e); CPU_OP(CPr_h); CPU_OP(CPr_l);
 
 CPU_OP(CPHL); CPU_OP(CPn);
 
-/// --- CB OPS --- ///
+// -- CB OPS -- //
 CPU_OP(BIT0b); CPU_OP(BIT0c); CPU_OP(BIT0d); CPU_OP(BIT0e);
 CPU_OP(BIT0h); CPU_OP(BIT0l); CPU_OP(BIT0m); CPU_OP(BIT0a);
 CPU_OP(BIT1b); CPU_OP(BIT1c); CPU_OP(BIT1d); CPU_OP(BIT1e);
@@ -100,24 +115,24 @@ CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 static void* cpu_ops_basic[256] = {
     // 00
     OP(NOP), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(ADDHLBC), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(DECr_b), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(ADDHLBC), OP(unimplemented), OP(DECBC),
+    OP(unimplemented), OP(DECr_c), OP(unimplemented), OP(unimplemented),
     // 10
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(ADDHLDE), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(DECr_d), OP(unimplemented), OP(unimplemented),
+    OP(JRn), OP(ADDHLDE), OP(unimplemented), OP(DECDE),
+    OP(unimplemented), OP(DECr_e), OP(unimplemented), OP(unimplemented),
     // 20
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(ADDHLHL), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(JRNZn), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(DECr_h), OP(unimplemented), OP(unimplemented),
+    OP(JRZn), OP(ADDHLHL), OP(unimplemented), OP(DECHL),
+    OP(unimplemented), OP(DECr_l), OP(unimplemented), OP(unimplemented),
     // 30
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(JRNCn), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(DECHLm), OP(unimplemented), OP(unimplemented),
+    OP(JRCn), OP(unimplemented), OP(unimplemented), OP(DECSP),
+    OP(unimplemented), OP(DECr_a), OP(unimplemented), OP(unimplemented),
     // 40
     OP(LDrr_bb), OP(LDrr_bc), OP(LDrr_bd), OP(LDrr_be),
     OP(LDrr_bh), OP(LDrr_bl), OP(LDrHLm_b), OP(LDrr_ba),
@@ -159,19 +174,19 @@ static void* cpu_ops_basic[256] = {
     OP(CPr_b), OP(CPr_c), OP(CPr_d), OP(CPr_e),
     OP(CPr_h), OP(CPr_l), OP(CPHL), OP(CPr_a),
     // C0
+    OP(RETNZ), OP(unimplemented), OP(JPNZnn), OP(JPnn),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(RET), OP(unimplemented), OP(unimplemented),
+    OP(RETZ), OP(RET), OP(JPZnn), OP(unimplemented),
     OP(unimplemented), OP(CALLnn), OP(unimplemented), OP(unimplemented),
     // D0
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(RETNC), OP(unimplemented), OP(JPNCnn), OP(undefined),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(RETC), OP(unimplemented), OP(JPCnn), OP(undefined),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     // E0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
     OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
+    OP(unimplemented), OP(JPHL), OP(unimplemented), OP(undefined),
     OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented),
     // F0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),

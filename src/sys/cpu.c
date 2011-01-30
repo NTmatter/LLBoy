@@ -160,9 +160,9 @@ LDHLMR(a); LDHLMR(b); LDHLMR(c); LDHLMR(d); LDHLMR(e); LDHLMR(h); LDHLMR(l);
 #define LDRN(to) CPU_OP(LDrn_##to) \
 { \
     state->cpu.pc++; \
-    uint16_t address = mmu_rb(state, state->cpu.pc++) << 8 + mmu_rb(state, state->cpu.pc++); \
-    state->cpu.to = mmu_rb(state, address); \
     state->cpu.m = 2; \
+    state->cpu.to = mmu_rb(state, state->cpu.pc); \
+    state->cpu.pc++; \
 }
 LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
 #undef LDRN
@@ -228,6 +228,43 @@ CPU_OP(ADDHL)
     if((state->cpu.a ^ augend ^ addend) & 0x10) state->cpu.flags |= CPU_FLAG_HALF_CARRY;
 }
 
+// ---- Decrement ---- //
+#define DEC(X, Y, x, y) CPU_OP(DEC##X##Y) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 1; \
+    if(!state->cpu.y) state->cpu.x--; \
+    state->cpu.y--; \
+}
+DEC(B, C, b, c); DEC(D, E, d, e); DEC(H, L, h, l);
+#undef DEC
+CPU_OP(DECSP)
+{
+    state->cpu.pc++;
+    state->cpu.m = 1;
+    state->cpu.sp--;
+}
+
+#define DECR(r) CPU_OP(DECr_##r) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 1; \
+    state->cpu.r--; \
+    state->cpu.flags = (state->cpu.r ? 0 : CPU_FLAG_ZERO); \
+}
+DECR(a); DECR(b); DECR(c); DECR(d); DECR(e); DECR(h); DECR(l);
+#undef DECR
+
+CPU_OP(DECHLm)
+{
+    state->cpu.pc++;
+    state->cpu.m = 3;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    const uint8_t i = mmu_rb(state, addr) - 1;
+    mmu_wb(state, addr, i);
+    state->cpu.flags = (i ? 0 : CPU_FLAG_ZERO);
+}
+
 // -- Control Flow -- //
 /// CALLnn Unconditional Branch
 CPU_OP(CALLnn)
@@ -247,6 +284,7 @@ CPU_OP(CALLnn)
     state->cpu.pc = target;
 }
 
+// --- Returns --- //
 /// RET Unconditional Return
 CPU_OP(RET)
 {
@@ -255,6 +293,72 @@ CPU_OP(RET)
     state->cpu.pc = mmu_rw(state, state->cpu.sp);
     state->cpu.sp += 2;
 }
+
+#define RET(name, test) CPU_OP(RET##name) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 1; \
+    if(test) \
+    { \
+        state->cpu.pc = mmu_rw(state, state->cpu.sp); \
+        state->cpu.sp += 2; \
+        state->cpu.m += 2; \
+    } \
+}
+RET(NZ, !(state->cpu.flags & CPU_FLAG_ZERO));
+RET(Z, state->cpu.flags & CPU_FLAG_ZERO);
+RET(NC, !(state->cpu.flags & CPU_FLAG_CARRY));
+RET(C, state->cpu.flags & CPU_FLAG_CARRY);
+#undef RET
+
+// --- Jumps --- //
+// ---- Absolute ---- //
+#define JP(name, test) CPU_OP(JP##name) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 3; \
+    if(test) \
+    { \
+        state->cpu.pc = mmu_rw(state, state->cpu.pc); \
+        state->cpu.m++; \
+    } else { \
+        state->cpu.pc += 2; \
+    }\
+}
+JP(nn, true);
+JP(NZnn, !(state->cpu.flags & CPU_FLAG_ZERO));
+JP(Znn, state->cpu.flags & CPU_FLAG_ZERO);
+JP(NCnn, !(state->cpu.flags & CPU_FLAG_CARRY));
+JP(Cnn, state->cpu.flags & CPU_FLAG_CARRY);
+#undef JP
+
+/// Unconditional Absolute Jump, specified by HL
+CPU_OP(JPHL)
+{
+    state->cpu.pc++;
+    state->cpu.m = 1;
+    state->cpu.pc = (state->cpu.h << 8) + state->cpu.l;
+}
+
+// ---- Relative ---- //
+#define JR(name, test) CPU_OP(JR##name) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 2; \
+    if(test) \
+    { \
+        state->cpu.pc += (int8_t) mmu_rb(state, state->cpu.pc); \
+        state->cpu.m++; \
+    } else { \
+        state->cpu.pc++; \
+    } \
+}
+JR(n, true);
+JR(NZn, !(state->cpu.flags & CPU_FLAG_ZERO));
+JR(Zn, state->cpu.flags & CPU_FLAG_ZERO);
+JR(NCn, !(state->cpu.flags & CPU_FLAG_CARRY));
+JR(Cn, state->cpu.flags & CPU_FLAG_CARRY);
+#undef JR
 
 // -- Comparison -- //
 #define CPR(r) CPU_OP(CPr_##r)\

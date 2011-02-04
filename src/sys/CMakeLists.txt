@@ -34,6 +34,10 @@ add_executable(cpu_test_arithmetic cpu_test_arithmetic.c)
 target_link_libraries(cpu_test_arithmetic llboy_system)
 add_test("CpuArithmetic" cpu_test_arithmetic)
 
+add_executable(cpu_test_stack cpu_test_stack.c)
+target_link_libraries(cpu_test_stack llboy_system)
+add_test("CpuStack" cpu_test_stack)
+
 add_executable(cpu_test_controlflow cpu_test_controlflow.c)
 target_link_libraries(cpu_test_controlflow llboy_system)
 add_test("CpuControlFlow" cpu_test_controlflow)

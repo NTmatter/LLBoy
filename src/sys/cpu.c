@@ -192,6 +192,27 @@ LDRN(a); LDRN(b); LDRN(c); LDRN(d); LDRN(e); LDRN(h); LDRN(l);
 SWAPR(a); SWAPR(b); SWAPR(c); SWAPR(d); SWAPR(e); SWAPR(h); SWAPR(l);
 #undef SWAPR
 
+// --- Stack Operations --- //
+#define PUSH(XY, x, y) CPU_OP(PUSH##XY) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 3; \
+    mmu_wb(state, --state->cpu.sp, state->cpu.x); \
+    mmu_wb(state, --state->cpu.sp, state->cpu.y); \
+}
+PUSH(BC, b, c); PUSH(DE, d, e); PUSH(HL, h, l); PUSH(AF, a, flags);
+#undef PUSH
+
+#define POP(XY, x, y) CPU_OP(POP##XY) \
+{ \
+    state->cpu.pc++; \
+    state->cpu.m = 3; \
+    state->cpu.y = mmu_rb(state, state->cpu.sp++); \
+    state->cpu.x = mmu_rb(state, state->cpu.sp++); \
+}
+POP(BC, b, c); POP(DE, d, e); POP(HL, h, l); POP(AF, a, flags);
+#undef POP
+
 // --- Arithmetic Ops --- //
 // ---- Addition ---- //
 // Single Register

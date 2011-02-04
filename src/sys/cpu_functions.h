@@ -69,6 +69,10 @@ CPU_OP(JRn); CPU_OP(JRCn); CPU_OP(JRNCn); CPU_OP(JRZn); CPU_OP(JRNZn);
 // ---- Swap operations ---- //
 CPU_OP(SWAPr_a); CPU_OP(SWAPr_b); CPU_OP(SWAPr_c); CPU_OP(SWAPr_d); CPU_OP(SWAPr_e); CPU_OP(SWAPr_h); CPU_OP(SWAPr_l);
 
+// --- Stack Operations --- //
+CPU_OP(PUSHAF); CPU_OP(PUSHBC); CPU_OP(PUSHDE); CPU_OP(PUSHHL);
+CPU_OP(POPAF); CPU_OP(POPBC); CPU_OP(POPDE); CPU_OP(POPHL);
+
 // --- Arithmetic Ops --- //
 // ---- Addition ---- //
 // Single Register
@@ -183,23 +187,23 @@ static void* cpu_ops_basic[256] = {
     OP(CPr_b), OP(CPr_c), OP(CPr_d), OP(CPr_e),
     OP(CPr_h), OP(CPr_l), OP(CPHL), OP(CPr_a),
     // C0
-    OP(RETNZ), OP(unimplemented), OP(JPNZnn), OP(JPnn),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(RETNZ), OP(POPBC), OP(JPNZnn), OP(JPnn),
+    OP(unimplemented), OP(PUSHBC), OP(unimplemented), OP(unimplemented),
     OP(RETZ), OP(RET), OP(JPZnn), OP(unimplemented),
     OP(unimplemented), OP(CALLnn), OP(unimplemented), OP(unimplemented),
     // D0
-    OP(RETNC), OP(unimplemented), OP(JPNCnn), OP(undefined),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(RETNC), OP(POPDE), OP(JPNCnn), OP(undefined),
+    OP(unimplemented), OP(PUSHDE), OP(unimplemented), OP(unimplemented),
     OP(RETC), OP(unimplemented), OP(JPCnn), OP(undefined),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     // E0
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(undefined),
-    OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(POPHL), OP(unimplemented), OP(undefined),
+    OP(undefined), OP(PUSHHL), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(JPHL), OP(unimplemented), OP(undefined),
     OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented),
     // F0
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(DI),
-    OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(POPAF), OP(unimplemented), OP(DI),
+    OP(undefined), OP(PUSHAF), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     OP(undefined), OP(undefined), OP(CPn), OP(unimplemented)
 };

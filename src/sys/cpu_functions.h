@@ -26,8 +26,12 @@ CPU_OP(undefined);
 
 /// Handler for opcodes that exist but have not been implemented
 CPU_OP(unimplemented);
+
+
 CPU_OP(NOP);
 CPU_OP(HALT);
+CPU_OP(EI);
+CPU_OP(DI);
 
 // --- Load/Store operations --- //
 // ---- Register-to-Register ---- //
@@ -194,7 +198,7 @@ static void* cpu_ops_basic[256] = {
     OP(unimplemented), OP(JPHL), OP(unimplemented), OP(undefined),
     OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented),
     // F0
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(DI),
     OP(undefined), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     OP(undefined), OP(undefined), OP(CPn), OP(unimplemented)
@@ -277,9 +281,9 @@ static void* cpu_ops_cb[256] = {
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // F0
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(DI),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(EI),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented)
 };
 #undef OP

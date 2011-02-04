@@ -113,6 +113,20 @@ CPU_OP(HALT)
     state->cpu.m = 1;
 }
 
+CPU_OP(EI)
+{
+    state->cpu.pc++;
+    state->cpu.ime = true;
+    state->cpu.m = 1;
+}
+
+CPU_OP(DI)
+{
+    state->cpu.pc++;
+    state->cpu.ime = false;
+    state->cpu.m = 1;
+}
+
 // --- Load/Store operations --- //
 // ---- Register-to-Register ---- //
 // for to in a b c d e h l; do for from in a b c d e h l; do echo "LDRR($to,$from);"; done; done

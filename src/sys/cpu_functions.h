@@ -10,6 +10,7 @@ void cpu_hello();
 
 /// Initializes the contents of the provided cpu structure
 void cpu_initialize(cpu_t* cpu);
+void cpu_execute(system_t* state);
 
 void cpu_reset(system_t* state);
 
@@ -51,7 +52,13 @@ CPU_OP(LDHLmr_a); CPU_OP(LDHLmr_b); CPU_OP(LDHLmr_c); CPU_OP(LDHLmr_d); CPU_OP(L
 // CPU_OP(LDrn_$to)
 CPU_OP(LDrn_a); CPU_OP(LDrn_b); CPU_OP(LDrn_c); CPU_OP(LDrn_d); CPU_OP(LDrn_e); CPU_OP(LDrn_h); CPU_OP(LDrn_l);
 
-// TODO: other load/store ops starting at LDHLmn
+// ---- Miscellaneous Load/Store operations ---- //
+CPU_OP(LDHLDA); CPU_OP(LDHLIA); CPU_OP(LDAHLD); CPU_OP(LDAHLI);
+CPU_OP(LDHLmn);
+CPU_OP(LDABCm); CPU_OP(LDADEm);
+CPU_OP(LDBCnn); CPU_OP(LDDEnn); CPU_OP(LDHLnn); CPU_OP(LDSPnn);
+CPU_OP(LDmmA); CPU_OP(LDAmm);
+CPU_OP(LDAIOn); CPU_OP(LDIOnA); CPU_OP(LDAIOC); CPU_OP(LDIOCA);
 
 // --- Control Flow --- //
 // ---- Function Calls ---- //
@@ -126,24 +133,24 @@ CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 #define OP(opname) cpu_op_##opname
 static void* cpu_ops_basic[256] = {
     // 00
-    OP(NOP), OP(unimplemented), OP(unimplemented), OP(INCBC),
+    OP(NOP), OP(LDBCnn), OP(unimplemented), OP(INCBC),
     OP(INCr_b), OP(DECr_b), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(ADDHLBC), OP(unimplemented), OP(DECBC),
+    OP(unimplemented), OP(ADDHLBC), OP(LDABCm), OP(DECBC),
     OP(INCr_c), OP(DECr_c), OP(unimplemented), OP(unimplemented),
     // 10
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(INCDE),
+    OP(unimplemented), OP(LDDEnn), OP(unimplemented), OP(INCDE),
     OP(INCr_d), OP(DECr_d), OP(unimplemented), OP(unimplemented),
-    OP(JRn), OP(ADDHLDE), OP(unimplemented), OP(DECDE),
+    OP(JRn), OP(ADDHLDE), OP(LDADEm), OP(DECDE),
     OP(INCr_e), OP(DECr_e), OP(unimplemented), OP(unimplemented),
     // 20
-    OP(JRNZn), OP(unimplemented), OP(unimplemented), OP(INCHL),
+    OP(JRNZn), OP(LDHLnn), OP(LDHLIA), OP(INCHL),
     OP(INCr_h), OP(DECr_h), OP(unimplemented), OP(unimplemented),
-    OP(JRZn), OP(ADDHLHL), OP(unimplemented), OP(DECHL),
+    OP(JRZn), OP(ADDHLHL), OP(LDAHLI), OP(DECHL),
     OP(INCr_l), OP(DECr_l), OP(unimplemented), OP(unimplemented),
     // 30
-    OP(JRNCn), OP(unimplemented), OP(unimplemented), OP(INCSP),
-    OP(INCHLm), OP(DECHLm), OP(unimplemented), OP(unimplemented),
-    OP(JRCn), OP(unimplemented), OP(unimplemented), OP(DECSP),
+    OP(JRNCn), OP(LDSPnn), OP(LDHLDA), OP(INCSP),
+    OP(INCHLm), OP(DECHLm), OP(LDHLmn), OP(unimplemented),
+    OP(JRCn), OP(unimplemented), OP(LDAHLD), OP(DECSP),
     OP(INCr_a), OP(DECr_a), OP(unimplemented), OP(unimplemented),
     // 40
     OP(LDrr_bb), OP(LDrr_bc), OP(LDrr_bd), OP(LDrr_be),
@@ -196,14 +203,14 @@ static void* cpu_ops_basic[256] = {
     OP(RETC), OP(unimplemented), OP(JPCnn), OP(undefined),
     OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
     // E0
-    OP(unimplemented), OP(POPHL), OP(unimplemented), OP(undefined),
+    OP(LDIOnA), OP(POPHL), OP(LDIOCA), OP(undefined),
     OP(undefined), OP(PUSHHL), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(JPHL), OP(unimplemented), OP(undefined),
+    OP(unimplemented), OP(JPHL), OP(LDmmA), OP(undefined),
     OP(undefined), OP(undefined), OP(unimplemented), OP(unimplemented),
     // F0
-    OP(unimplemented), OP(POPAF), OP(unimplemented), OP(DI),
+    OP(LDAIOn), OP(POPAF), OP(LDAIOC), OP(DI),
     OP(undefined), OP(PUSHAF), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(undefined), OP(unimplemented), OP(unimplemented),
+    OP(unimplemented), OP(undefined), OP(LDAmm), OP(unimplemented),
     OP(undefined), OP(undefined), OP(CPn), OP(unimplemented)
 };
 

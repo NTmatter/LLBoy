@@ -73,14 +73,22 @@ void cpu_rrs(system_t* state)
 /// Execute an instruction
 /// Core of Fetch/Decode/Execute loop
 /// This should probably be absorbed into the code generator
-void cpu_exec(system_t* state)
+void cpu_execute(system_t* state)
 {
-    uint8_t opcode = mmu_rb(state, state->cpu.pc);
-    // Fetch op implementation from table
-    void (*op)(system_t* state) = 0;
-    // execute op
+    uint8_t opcode;
+    void (*op)(system_t*);
+    
+    // Fetch op implementation from appropriate table
+    opcode = mmu_rb(state, state->cpu.pc);
+    if(opcode == 0xCB) {
+        opcode = mmu_rb(state, state->cpu.pc++);
+        op = cpu_ops_cb[opcode];
+    } else {
+        op = cpu_ops_basic[opcode];
+    }
+    
+    // Execute operation against current state
     op(state);
-    state->cpu.clock.m += state->cpu.m;
 }
 
 #define CPU_INSTRUCTION_PRE {\
@@ -363,6 +371,143 @@ CPU_OP(DECHLm)
     state->cpu.flags = (i ? 0 : CPU_FLAG_ZERO);
     CPU_INSTRUCTION_POST;
 }
+
+// ---- Miscellaneous Load/Store operations ---- //
+CPU_OP(LDHLDA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    mmu_wb(state, addr, state->cpu.a);
+    state->cpu.l--;
+    if(state->cpu.l == 255) state->cpu.h--;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDHLIA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    mmu_wb(state, addr, state->cpu.a);
+    state->cpu.l++;
+    if(state->cpu.l == 0) state->cpu.h++;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDAHLI)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    state->cpu.a = mmu_rb(state, addr);
+    state->cpu.l++;
+    if(state->cpu.l == 0) state->cpu.h++;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDAHLD)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    state->cpu.a = mmu_rb(state, addr);
+    state->cpu.l--;
+    if(state->cpu.l == 255) state->cpu.h--;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDHLmn)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 3;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    mmu_wb(state, addr, mmu_rb(state, state->cpu.pc++));
+    CPU_INSTRUCTION_POST;
+}
+
+#define LDXYnn(XY, x, y) CPU_OP(LD##XY##nn) \
+{ \
+    CPU_INSTRUCTION_PRE; \
+    state->cpu.m = 3; \
+    state->cpu.y = mmu_rb(state, state->cpu.pc++); \
+    state->cpu.x = mmu_rb(state, state->cpu.pc++); \
+    CPU_INSTRUCTION_POST; \
+}
+LDXYnn(BC, b, c); LDXYnn(DE, d, e); LDXYnn(HL, h, l);
+#undef LDXYnn
+
+CPU_OP(LDSPnn)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 3;
+    state->cpu.sp = mmu_rw(state, state->cpu.pc);
+    state->cpu.pc += 2;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDmmA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 4;
+    const uint16_t addr = mmu_rw(state, state->cpu.pc);
+    state->cpu.pc += 2;
+    mmu_wb(state, addr, state->cpu.a);
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDAmm)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 4;
+    state->cpu.a = mmu_rb(state, mmu_rw(state, state->cpu.pc));
+    state->cpu.pc += 2;
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDAIOn)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 3;
+    const uint8_t offset = mmu_rb(state, state->cpu.pc++);
+    state->cpu.a = mmu_rb(state, 0xFF00 + offset);
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDIOnA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 3;
+    const uint8_t offset = mmu_rb(state, state->cpu.pc++);
+    mmu_wb(state, 0xFF00 + offset, state->cpu.a);
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDAIOC)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    state->cpu.a = mmu_rb(state, 0xFF00 + state->cpu.r);
+    CPU_INSTRUCTION_POST;
+}
+
+CPU_OP(LDIOCA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.m = 2;
+    mmu_wb(state, 0xFF00 + state->cpu.c, state->cpu.a);
+    CPU_INSTRUCTION_POST;
+}
+#define LDA(XY, x, y) CPU_OP(LDA##XY##m)\
+{ \
+    CPU_INSTRUCTION_PRE; \
+    state->cpu.m = 2; \
+    const uint16_t addr = (state->cpu.x << 8) + state->cpu.y; \
+    state->cpu.a = mmu_rb(state, addr); \
+    CPU_INSTRUCTION_POST; \
+}
+LDA(BC, b, c); LDA(DE, d, e);
+#undef LDA
 
 // -- Control Flow -- //
 /// CALLnn Unconditional Branch

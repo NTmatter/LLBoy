@@ -35,28 +35,28 @@ int main (int argc, char const *argv[])
     printf("Initial State, SP = 0x%04X\n", state->cpu.sp);
     
     // PUSHAF
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed PUSHAF, SP = 0x%04X\n", state->cpu.sp);
     assert(state->cpu.sp == 0xFFFC);
     assert(mmu_rb(state, 0xFFFD) == 0x01);
     assert(mmu_rb(state, 0xFFFC) == CPU_FLAG_ZERO);
     
     // PUSHBC
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed PUSHBC, SP = 0x%04X\n", state->cpu.sp);
     assert(state->cpu.sp == 0xFFFA);
     assert(mmu_rb(state, 0xFFFB) == 0x02);
     assert(mmu_rb(state, 0xFFFA) == 0x03);
     
     // POPAF
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed POPAF, SP = 0x%04X\n", state->cpu.sp);
     assert(state->cpu.sp == 0xFFFC);
     assert(state->cpu.a == 0x02);
     assert(state->cpu.flags == 0x03);
     
     // POPBC
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed POPBC, SP = 0x%04X\n", state->cpu.sp);
     assert(state->cpu.sp == 0xFFFE);
     assert(state->cpu.b == 0x01);

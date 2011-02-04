@@ -30,17 +30,17 @@ int main (int argc, char const *argv[])
     void (*op)(system_t*);
     
     // CALLnn function at 0x0050
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed CALLnn, PC = 0x%04x\n", state->cpu.pc);
     assert(state->cpu.pc == 0x50);
     
     // ADDr_b, a := a + b = 1 + 2 = 3
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed ADDr_b, PC = 0x%04x\n", state->cpu.pc);
     assert(state->cpu.a == 0x03);
     
     // RET, back to 0x03 after the CALLnn and arguments
-    ((void (*)(system_t*)) cpu_ops_basic[mem[state->cpu.pc]])(state);
+    cpu_execute(state);
     printf("Executed RET, PC = 0x%04x\n", state->cpu.pc);
     assert(state->cpu.pc == 0x03);
     

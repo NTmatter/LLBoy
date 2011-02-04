@@ -381,7 +381,7 @@ CPU_OP(DECHLm)
 {
     CPU_INSTRUCTION_PRE;
     state->cpu.m = 3;
-    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l;
+    const uint16_t addr = (state->cpu.h << 8) + state->cpu.l; 
     const uint8_t i = mmu_rb(state, addr) - 1;
     mmu_wb(state, addr, i);
     state->cpu.flags = (i ? 0 : CPU_FLAG_ZERO);
@@ -705,6 +705,18 @@ CPU_OP(RLA)
 }
 RLr(a); RLr(b); RLr(c); RLr(d); RLr(e); RLr(h); RLr(l);
 #undef RLr
+
+// --- XOR --- //
+#define XORr(r) CPU_OP(XORr_##r) \
+{ \
+    CPU_INSTRUCTION_PRE; \
+    state->cpu.m = 1; \
+    state->cpu.a ^= state->cpu.r; \
+    state->cpu.flags = state->cpu.a ? 0 : CPU_FLAG_ZERO; \
+    CPU_INSTRUCTION_POST; \
+}
+XORr(a); XORr(b); XORr(c); XORr(d); XORr(e); XORr(h); XORr(l);
+#undef XORr
 // -- CB Ops -- //
 // --- Bit Queries --- //
 #define BITnr(n, r) CPU_OP(BIT##n##r) \

@@ -121,6 +121,10 @@ CPU_OP(RLA);
 CPU_OP(RLr_a); CPU_OP(RLr_b); CPU_OP(RLr_c); CPU_OP(RLr_d);
 CPU_OP(RLr_e); CPU_OP(RLr_h); CPU_OP(RLr_l);
 
+// --- XOR --- //
+CPU_OP(XORr_a); CPU_OP(XORr_b); CPU_OP(XORr_c); CPU_OP(XORr_d);
+CPU_OP(XORr_e); CPU_OP(XORr_h); CPU_OP(XORr_l);
+
 // -- CB OPS -- //
 CPU_OP(BIT0b); CPU_OP(BIT0c); CPU_OP(BIT0d); CPU_OP(BIT0e);
 CPU_OP(BIT0h); CPU_OP(BIT0l); CPU_OP(BIT0m); CPU_OP(BIT0a);
@@ -196,8 +200,8 @@ static void* cpu_ops_basic[256] = {
     // A0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(XORr_b), OP(XORr_c), OP(XORr_d), OP(XORr_e),
+    OP(XORr_h), OP(XORr_l), OP(unimplemented), OP(XORr_a),
     // B0
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),

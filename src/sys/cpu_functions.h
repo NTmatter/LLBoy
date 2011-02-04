@@ -20,7 +20,6 @@ void cpu_rsv(system_t* state);
 void cpu_rrs(system_t* state);
 
 // -- Ops -- //
-
 /// Handler for unknown opcodes
 CPU_OP(undefined);
 

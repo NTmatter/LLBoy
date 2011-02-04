@@ -662,6 +662,33 @@ CPU_OP(CPn)
     CPU_INSTRUCTION_POST;
 }
 
+// --- Rotations --- //
+CPU_OP(RLA)
+{
+    CPU_INSTRUCTION_PRE;
+    state->cpu.r = 1;
+    const uint8_t carry_in = (state->cpu.flags & CPU_FLAG_CARRY) ? 1 : 0;
+    const uint8_t carry_out = (state->cpu.a & 0x80) ? CPU_FLAG_CARRY : 0;
+    state->cpu.a = (state->cpu.a << 1) + carry_in;
+    state->cpu.flags &= 0xEF;
+    state->cpu.flags |= carry_out;
+    CPU_INSTRUCTION_POST;
+}
+
+#define RLr(r) CPU_OP(RLr_##r) \
+{ \
+    CPU_INSTRUCTION_PRE; \
+    /* CB OP */ state->cpu.pc++; \
+    state->cpu.m = 2; \
+    const uint8_t carry_in = (state->cpu.flags & CPU_FLAG_CARRY) ? 1 : 0; \
+    const uint8_t carry_out = (state->cpu.r & 0x80) ? CPU_FLAG_CARRY : 0; \
+    state->cpu.r = (state->cpu.r << 1) + carry_in; \
+    state->cpu.flags &= 0xEF; \
+    state->cpu.flags |= carry_out; \
+    CPU_INSTRUCTION_POST; \
+}
+RLr(a); RLr(b); RLr(c); RLr(d); RLr(e); RLr(h); RLr(l);
+#undef RLr
 // -- CB Ops -- //
 // --- Bit Queries --- //
 #define BITnr(n, r) CPU_OP(BIT##n##r) \

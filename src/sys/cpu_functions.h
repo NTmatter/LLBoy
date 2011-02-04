@@ -110,6 +110,12 @@ CPU_OP(CPr_e); CPU_OP(CPr_h); CPU_OP(CPr_l);
 
 CPU_OP(CPHL); CPU_OP(CPn);
 
+// --- Rotations --- //
+CPU_OP(RLA);
+
+CPU_OP(RLr_a); CPU_OP(RLr_b); CPU_OP(RLr_c); CPU_OP(RLr_d);
+CPU_OP(RLr_e); CPU_OP(RLr_h); CPU_OP(RLr_l);
+
 // -- CB OPS -- //
 CPU_OP(BIT0b); CPU_OP(BIT0c); CPU_OP(BIT0d); CPU_OP(BIT0e);
 CPU_OP(BIT0h); CPU_OP(BIT0l); CPU_OP(BIT0m); CPU_OP(BIT0a);
@@ -139,7 +145,7 @@ static void* cpu_ops_basic[256] = {
     OP(INCr_c), OP(DECr_c), OP(unimplemented), OP(unimplemented),
     // 10
     OP(unimplemented), OP(LDDEnn), OP(unimplemented), OP(INCDE),
-    OP(INCr_d), OP(DECr_d), OP(unimplemented), OP(unimplemented),
+    OP(INCr_d), OP(DECr_d), OP(unimplemented), OP(RLA),
     OP(JRn), OP(ADDHLDE), OP(LDADEm), OP(DECDE),
     OP(INCr_e), OP(DECr_e), OP(unimplemented), OP(unimplemented),
     // 20
@@ -221,8 +227,8 @@ static void* cpu_ops_cb[256] = {
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 10
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(RLr_b), OP(RLr_c), OP(RLr_d), OP(RLr_e),
+    OP(RLr_h), OP(RLr_l), OP(unimplemented), OP(RLr_a),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 20

@@ -92,6 +92,11 @@ CPU_OP(ADDHLSP);
 // From memory
 CPU_OP(ADDHL); CPU_OP(ADDn); CPU_OP(ADDSPn);
 
+// ---- Subtraction ---- //
+// Single Register
+CPU_OP(SUBr_a); CPU_OP(SUBr_b); CPU_OP(SUBr_c); CPU_OP(SUBr_d);
+CPU_OP(SUBr_e); CPU_OP(SUBr_h); CPU_OP(SUBr_l);
+
 // ---- Increment ---- //
 CPU_OP(INCBC); CPU_OP(INCDE); CPU_OP(INCDE); CPU_OP(INCHL); CPU_OP(INCSP);
 
@@ -184,8 +189,8 @@ static void* cpu_ops_basic[256] = {
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // 90
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
-    OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
+    OP(SUBr_b), OP(SUBr_c), OP(SUBr_d), OP(SUBr_e),
+    OP(SUBr_h), OP(SUBr_l), OP(unimplemented), OP(SUBr_a),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     OP(unimplemented), OP(unimplemented), OP(unimplemented), OP(unimplemented),
     // A0

@@ -291,6 +291,22 @@ CPU_OP(ADDHL)
     if((state->cpu.a ^ augend ^ addend) & 0x10) state->cpu.flags |= CPU_FLAG_HALF_CARRY;
 }
 
+// ---- Subtraction ---- //
+// Single Register
+#define SUBR(r) CPU_OP(SUBr_##r) \
+{ \
+    CPU_INSTRUCTION_PRE; \
+    state->cpu.m = 1; \
+    const uint8_t ai = state->cpu.a; \
+    state->cpu.a -= state->cpu.b; \
+    state->cpu.flags = CPU_FLAG_OPERATION; \
+    if(state->cpu.a == 0) state->cpu.flags |= CPU_FLAG_ZERO; \
+    if(state->cpu.a^state->cpu.b^ai) state->cpu.flags |= CPU_FLAG_HALF_CARRY; \
+    CPU_INSTRUCTION_POST; \
+}
+SUBR(a); SUBR(b); SUBR(c); SUBR(d); SUBR(e); SUBR(h); SUBR(l);
+#undef SUBR
+
 // ---- Increment ---- //
 #define INC(X, Y, x, y) CPU_OP(INC##X##Y) \
 { \

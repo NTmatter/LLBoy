@@ -17,6 +17,7 @@ extern "C"
 {
     #include "sys/system.h"
     #include "sys/cpu.h"
+    #include "sys/cpu_functions_names.h"
 }
 
 using namespace std;
@@ -65,7 +66,7 @@ int main(int argc, char** argv)
     
     engine->addModule(module_cpu);
     
-    Function* op_ADDr_b = module_cpu->getFunction("cpu_op_ADDr_b");
+    Function* op_ADDr_b = module_cpu->getFunction(cpu_op_names_basic[0x80]);
     if(op_ADDr_b)
     {
         cout << "Found ADDr_b function" << endl;

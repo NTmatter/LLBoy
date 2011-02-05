@@ -26,6 +26,7 @@ add_library (llboy ${SYSTEM_SOURCES})
 add_library (llboy_system ${SYSTEM_SOURCES})
 
 # Tests
+# CPU Tests
 add_executable(test_cpu_basic test_cpu_basic.c)
 target_link_libraries(test_cpu_basic llboy_system)
 add_test("CpuBasics" test_cpu_basic)
@@ -58,3 +59,8 @@ add_test("MmuRegions" test_mmu_contiguous)
 add_executable(test_mmu_rw test_mmu_rw.c)
 target_link_libraries(test_mmu_rw llboy_system)
 add_test("MmuReadWrite" test_mmu_rw)
+
+# System Tests
+add_executable(test_system_bios test_system_bios.c)
+target_link_libraries(test_system_bios llboy_system)
+add_test("SystemBios" test_system_bios)

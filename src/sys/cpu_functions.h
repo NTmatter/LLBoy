@@ -20,13 +20,14 @@ void cpu_rsv(system_t* state);
 /// Restore registers
 void cpu_rrs(system_t* state);
 
+void cpu_op_cb(system_t* state);
+
 // -- Ops -- //
 /// Handler for unknown opcodes
 CPU_OP(undefined);
 
 /// Handler for opcodes that exist but have not been implemented
 CPU_OP(unimplemented);
-
 
 CPU_OP(NOP);
 CPU_OP(HALT);
@@ -149,24 +150,24 @@ CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 static void* cpu_ops_basic[256] = {
     // 00
     OP(NOP), OP(LDBCnn), OP(unimplemented), OP(INCBC),
-    OP(INCr_b), OP(DECr_b), OP(unimplemented), OP(unimplemented),
+    OP(INCr_b), OP(DECr_b), OP(LDrn_b), OP(unimplemented),
     OP(unimplemented), OP(ADDHLBC), OP(LDABCm), OP(DECBC),
-    OP(INCr_c), OP(DECr_c), OP(unimplemented), OP(unimplemented),
+    OP(INCr_c), OP(DECr_c), OP(LDrn_c), OP(unimplemented),
     // 10
     OP(unimplemented), OP(LDDEnn), OP(unimplemented), OP(INCDE),
-    OP(INCr_d), OP(DECr_d), OP(unimplemented), OP(RLA),
+    OP(INCr_d), OP(DECr_d), OP(LDrn_d), OP(RLA),
     OP(JRn), OP(ADDHLDE), OP(LDADEm), OP(DECDE),
-    OP(INCr_e), OP(DECr_e), OP(unimplemented), OP(unimplemented),
+    OP(INCr_e), OP(DECr_e), OP(LDrn_e), OP(unimplemented),
     // 20
     OP(JRNZn), OP(LDHLnn), OP(LDHLIA), OP(INCHL),
-    OP(INCr_h), OP(DECr_h), OP(unimplemented), OP(unimplemented),
+    OP(INCr_h), OP(DECr_h), OP(LDrn_h), OP(unimplemented),
     OP(JRZn), OP(ADDHLHL), OP(LDAHLI), OP(DECHL),
-    OP(INCr_l), OP(DECr_l), OP(unimplemented), OP(unimplemented),
+    OP(INCr_l), OP(DECr_l), OP(LDrn_l), OP(unimplemented),
     // 30
     OP(JRNCn), OP(LDSPnn), OP(LDHLDA), OP(INCSP),
     OP(INCHLm), OP(DECHLm), OP(LDHLmn), OP(unimplemented),
     OP(JRCn), OP(unimplemented), OP(LDAHLD), OP(DECSP),
-    OP(INCr_a), OP(DECr_a), OP(unimplemented), OP(unimplemented),
+    OP(INCr_a), OP(DECr_a), OP(LDrn_a), OP(unimplemented),
     // 40
     OP(LDrr_bb), OP(LDrr_bc), OP(LDrr_bd), OP(LDrr_be),
     OP(LDrr_bh), OP(LDrr_bl), OP(LDrHLm_b), OP(LDrr_ba),
@@ -210,7 +211,7 @@ static void* cpu_ops_basic[256] = {
     // C0
     OP(RETNZ), OP(POPBC), OP(JPNZnn), OP(JPnn),
     OP(unimplemented), OP(PUSHBC), OP(unimplemented), OP(unimplemented),
-    OP(RETZ), OP(RET), OP(JPZnn), OP(unimplemented),
+    OP(RETZ), OP(RET), OP(JPZnn), cpu_op_cb,
     OP(unimplemented), OP(CALLnn), OP(unimplemented), OP(unimplemented),
     // D0
     OP(RETNC), OP(POPDE), OP(JPNCnn), OP(undefined),

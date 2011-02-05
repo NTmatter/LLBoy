@@ -81,7 +81,7 @@ void cpu_execute(system_t* state)
     // Fetch op implementation from appropriate table
     opcode = mmu_rb(state, state->cpu.pc);
     if(opcode == 0xCB) {
-        opcode = mmu_rb(state, state->cpu.pc++);
+        opcode = mmu_rb(state, ++state->cpu.pc);
         op = cpu_ops_cb[opcode];
     } else {
         op = cpu_ops_basic[opcode];
@@ -113,6 +113,11 @@ void cpu_op_unimplemented(system_t* state)
     printf("Hit unimplemented instruction 0x%02x at 0x%04x\n",
         mmu_rb(state, state->cpu.pc), state->cpu.pc);
     state->cpu.halt = true;
+}
+
+void cpu_op_cb(system_t* state)
+{
+    // DO NOTHING?
 }
 
 CPU_OP(NOP)

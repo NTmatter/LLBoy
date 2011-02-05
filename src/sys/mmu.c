@@ -13,9 +13,6 @@ void mmu_initialize(mmu_t* mmu)
 {
     mmu->rom_offset = 0x4000;
     mmu->in_bios = true;
-    mmu->wram = (uint8_t*) malloc(MMU_WRAM_SIZE);
-    mmu->eram = (uint8_t*) malloc(MMU_ERAM_SIZE);
-    mmu->zram = (uint8_t*) malloc(MMU_ZRAM_SIZE); // XXX originally 127
     
     // This is problematic, as we need to enlarge the memory allocation to fit the banks declared
     // in the cart. See REALLOC.
@@ -35,10 +32,6 @@ void mmu_reset(system_t* state)
     mmu->cart_type = 0;
     mmu->ram_offset = 0;
     mmu->rom_offset = 0x4000;
-    
-    memset(mmu->wram, 0, MMU_WRAM_SIZE);
-    memset(mmu->eram, 0, MMU_ERAM_SIZE);
-    memset(mmu->zram, 0, MMU_ZRAM_SIZE); // XXX originally 127
 }
 
 uint32_t mmu_memory_offset(system_t* state, uint16_t addr)

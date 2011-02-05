@@ -28,11 +28,6 @@ typedef struct {
         // Some other type?
     } mbc;
     
-    // These could probably be condensed into a single array
-    uint8_t* wram;
-    uint8_t* eram;
-    uint8_t* zram;
-    
     uint16_t rom_offset;
     uint16_t ram_offset;
     

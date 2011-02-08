@@ -27,11 +27,11 @@
 #include "mmu.h"
 
 /// Aggregates all of the system components
-typedef struct {
+struct system {
     cpu_t cpu;
     mmu_t mmu;
-} system_t;
-
+};
+typedef struct system system_t;
 system_t* initialize_system();
 
 #endif

@@ -14,14 +14,25 @@ foreach(SOURCEFILE ${SYSTEM_SOURCES})
     unset(FOUND${SOURCEFILE})
 endforeach(SOURCEFILE)
 
+find_file(GAME_TEMPLATE game_template.c
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}
+    NO_DEFAULT_PATH)
+
 # Create LLVM object files for sources
 add_custom_target(system-bitcode ALL
     COMMAND ${CLANG} -c -emit-llvm -I${CMAKE_CURRENT_SOURCE_DIR} ${SYSTEM_SOURCES_ABSOLUTE}
-    COMMAND ${LLVM_LINKER} -o llboy.bc *.o
-    COMMENT "Creating LLVM Bitcode objects for runtime load and optimization"
+    COMMAND ${LLVM_LINKER} -o llboy_system *.o
+    COMMENT "LLVM Bitcode objects"
     SOURCES ${SYSTEM_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
+# Create LLVM object files for sources
+add_custom_target(game-template ALL
+    COMMAND ${CLANG} -c -emit-llvm -I${CMAKE_CURRENT_SOURCE_DIR} ${GAME_TEMPLATE}
+    COMMENT "Template for Game Cache"
+    SOURCES ${GAME_TEMPLATE}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+        
 add_library (llboy ${SYSTEM_SOURCES})
 add_library (llboy_system ${SYSTEM_SOURCES})
 

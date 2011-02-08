@@ -45,3 +45,6 @@ add_subdirectory (sys)
 
 add_executable (LLBoy main.cpp)
 target_link_libraries (LLBoy ${LLVM_LIBRARIES})
+
+add_executable (Emitter instruction_emitter.cpp)
+target_link_libraries (Emitter ${LLVM_LIBRARIES})

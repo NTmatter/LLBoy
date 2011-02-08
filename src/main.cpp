@@ -33,6 +33,8 @@
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/CallingConv.h>
 
+#include <llvm/Type.h>
+
 #include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetSelect.h>
 
@@ -74,6 +76,14 @@ int main(int argc, char** argv)
     Module* module_system = read_module(context, "sys/system.o", &error);
     if(!module_system) cerr << "Failed to load System module: " << error << endl;
     cout << "Complete." << endl;
+    
+    // Try to find the system_t type
+    if(module_system->getTypeByName("system") == NULL)
+    {
+        cerr << "Could not find system type" << endl;
+    } else {
+        cout << "Found system_t" << endl;
+    }
     
     // InitializeNativeTarget();
     // ExecutionEngine* engine = ExecutionEngine::create(module_system, false, &error);

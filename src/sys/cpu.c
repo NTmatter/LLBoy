@@ -41,6 +41,12 @@ void cpu_initialize(cpu_t* cpu)
     memset(cpu, 0, sizeof(cpu_t));
 }
 
+uint16_t cpu_get_pc(system_t* state)
+{
+    printf(">>> Accessing PC\n"); // XXX
+    return state->cpu.pc;
+}
+
 void cpu_reset(system_t* state)
 {
     state->cpu.pc = 0;

@@ -43,6 +43,8 @@ void cpu_rrs(system_t* state);
 
 void cpu_op_cb(system_t* state);
 
+uint16_t cpu_get_pc(system_t* state);
+
 // -- Ops -- //
 /// Handler for unknown opcodes
 CPU_OP(undefined);

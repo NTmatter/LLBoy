@@ -68,17 +68,43 @@ int main (int argc, char const *argv[])
     // Create Module
     string error;
     LLVMContext &ctx = getGlobalContext();
-    Module* cpu = read_module(ctx, "sys/game_template.o", &error);
+    Module* cpu = read_module(ctx, "sys/cpu.o", &error);
     if(cpu == NULL)
     {
-        cerr << "Could not find game cache template" << endl;
+        cerr << "Could not find CPU objects" << endl;
         return 1;
+    } else {
+        cout << "Found CPU Implementation" << endl;
+    }
+    
+    Module* sys = read_module(ctx, "sys/system.o", &error);
+    if(sys == NULL)
+    {
+        cerr << "Could not find System objects" << endl;
+        return 1;
+    } else {
+        cout << "Found System Implementation" << endl;
+    }
+    
+    Function* cpu_get_pc = cpu->getFunction("cpu_get_pc");
+    if(cpu_get_pc == NULL)
+    {
+        cerr << "Could not find cpu_get_pc" << endl;
+        return 1;
+    } else {
+        cout << "Found getter for CPU Program Counter" << endl;
+    }
+    
+    Module* cacheTemplate = read_module(ctx, "sys/game_template.o", &error);
+    if(cacheTemplate == NULL)
+    {
+        cerr << "Could not find template for game cache" << endl;
     } else {
         cout << "Found game cache" << endl;
     }
     
     // Dig up template for cached instructions
-    Function* game_loop = cpu->getFunction("game_cache");
+    Function* game_loop = cacheTemplate->getFunction("game_cache");
     if(game_loop == NULL)
     {
         cerr << "Could not find game loop function" << endl;
@@ -87,6 +113,7 @@ int main (int argc, char const *argv[])
         cout << "Found game loop function" << endl;
     }
     
+    cout << "Game loop has " << game_loop->arg_size() << " arguments" << endl;
     const Type* systemType = game_loop->arg_begin()->getType();
     if(systemType == NULL)
     {
@@ -94,21 +121,33 @@ int main (int argc, char const *argv[])
         return 3;
     } else {
         cout << "Found type for system_t*" << endl;
+        systemType->dump();
     }
 
     const Type* ret = game_loop->getReturnType();
     ret->dump();
     
-    // TODO Switch statement with a basic block
+    // Game Cache function, bool game_cache(state_t* state)
     Module* cache = new Module("Game Cache", ctx);
     Function* f = cast<Function>(cache->getOrInsertFunction("game_cache", Type::getIntNTy(ctx, 1), systemType, NULL));
-    IRBuilder<>* b = new IRBuilder<>(BasicBlock::Create(ctx, "cache_block", f));
+    Argument* state = f->arg_begin();
+    state->setName("state");
+    
+    // Build default case for switch statement (return false)
     BasicBlock* defaultCase = BasicBlock::Create(ctx, "default");
     IRBuilder<>* defaultCaseBuilder = new IRBuilder<>(defaultCase);
-    defaultCase->CreateRet(ConstantInt::get(Type::getInt1Ty(ctx), false));
-    b.CreateSwitch(/* value to switch on */, defaultCase, "cached instructions");
+    defaultCaseBuilder->CreateRet(ConstantInt::get(Type::getInt1Ty(ctx), false));
     delete defaultCaseBuilder;
-    // Write module to file
+    
+    // Build switch Statement (switch(pc) { ... })
+    IRBuilder<>* b = new IRBuilder<>(BasicBlock::Create(ctx, "cache_block", f));
+    CallInst* pc = b->CreateCall(cpu_get_pc, state);
+    SwitchInst* sw = b->CreateSwitch(pc, defaultCase, 10);
+    delete b;
+    
+    // TODO Call function
+    
+    // TODO Write module to file
     cout << "done!" << endl;
     return 0;
 }

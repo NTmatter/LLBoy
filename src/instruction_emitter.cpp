@@ -133,17 +133,23 @@ int main (int argc, char const *argv[])
     Argument* state = f->arg_begin();
     state->setName("state");
     
-    // Build default case for switch statement (return false)
-    BasicBlock* defaultCase = BasicBlock::Create(ctx, "defaultCase");
-    IRBuilder<>* defaultCaseBuilder = new IRBuilder<>(defaultCase);
-    defaultCaseBuilder->CreateRet(ConstantInt::get(Type::getInt1Ty(ctx), false));
-    delete defaultCaseBuilder;
+    BasicBlock* label_entry = BasicBlock::Create(ctx, "entry", f);
     
-    // Build switch Statement (switch(pc) { ... })
-    IRBuilder<>* b = new IRBuilder<>(BasicBlock::Create(ctx, "cache_block", f));
-    // CallInst* pc = b->CreateCall(cpu_get_pc, state);
-    SwitchInst* sw = b->CreateSwitch(ConstantInt::get(Type::getInt1Ty(ctx), false), defaultCase, 10);
-    delete b;
+    // Build cases for switch statement
+    // Default: return false (not found)
+    BasicBlock* case_default = BasicBlock::Create(ctx, "defaultCase", f);
+    ReturnInst::Create(ctx, ConstantInt::get(Type::getInt1Ty(ctx), false), case_default);
+    
+    // Case 0: Pretend we have a cache hit, and return true
+    BasicBlock* case_0 = BasicBlock::Create(ctx, "defaultCase", f);
+    // TODO: Call mutator function
+    ReturnInst::Create(ctx, ConstantInt::get(Type::getInt1Ty(ctx), true), case_0);
+    
+    // Assemble the Switch instruction
+    SwitchInst* sw = SwitchInst::Create(ConstantInt::get(Type::getInt32Ty(ctx), 0), case_default, 10, label_entry);
+    sw->addCase(ConstantInt::get(Type::getInt32Ty(ctx), 0), case_0);
+    
+    
     
     f->dump();
     verifyFunction(*f);

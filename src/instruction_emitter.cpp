@@ -134,18 +134,32 @@ int main (int argc, char const *argv[])
     state->setName("state");
     
     // Build default case for switch statement (return false)
-    BasicBlock* defaultCase = BasicBlock::Create(ctx, "default");
+    BasicBlock* defaultCase = BasicBlock::Create(ctx, "defaultCase");
     IRBuilder<>* defaultCaseBuilder = new IRBuilder<>(defaultCase);
     defaultCaseBuilder->CreateRet(ConstantInt::get(Type::getInt1Ty(ctx), false));
     delete defaultCaseBuilder;
     
     // Build switch Statement (switch(pc) { ... })
     IRBuilder<>* b = new IRBuilder<>(BasicBlock::Create(ctx, "cache_block", f));
-    CallInst* pc = b->CreateCall(cpu_get_pc, state);
-    SwitchInst* sw = b->CreateSwitch(pc, defaultCase, 10);
+    // CallInst* pc = b->CreateCall(cpu_get_pc, state);
+    SwitchInst* sw = b->CreateSwitch(ConstantInt::get(Type::getInt1Ty(ctx), false), defaultCase, 10);
     delete b;
     
+    f->dump();
+    verifyFunction(*f);
+    
     // TODO Call function
+    cout << "Initializing targets..." << endl;
+    InitializeAllTargets();
+    ExecutionEngine* engine = ExecutionEngine::create(cache);
+    if(engine == NULL)
+    {
+        cerr << "Failed to create engine" << endl;
+        return 4;
+    } else {
+        cout << "Created engine" << endl;
+    }
+    
     
     // TODO Write module to file
     cout << "done!" << endl;

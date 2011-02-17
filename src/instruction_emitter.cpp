@@ -33,6 +33,7 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/CallingConv.h>
+#include <llvm/Linker.h>
 
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
@@ -42,7 +43,8 @@
 
 #include <llvm/Constants.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/Support/InstIterator.h>
+
+#include "sys/system.h"
 
 using namespace std;
 using namespace llvm;
@@ -140,24 +142,26 @@ int main (int argc, char const *argv[])
     BasicBlock* case_default = BasicBlock::Create(ctx, "defaultCase", f);
     ReturnInst::Create(ctx, ConstantInt::get(Type::getInt1Ty(ctx), false), case_default);
     
+    // Assemble the Switch instruction
+    IRBuilder<>* b = new IRBuilder<>(label_entry);
+    Value* pc = b->CreateCall(cpu_get_pc, state);
+    SwitchInst* sw = b->CreateSwitch(pc, case_default, 10);
+    delete b;
+    
     // Case 0: Pretend we have a cache hit, and return true
     BasicBlock* case_0 = BasicBlock::Create(ctx, "defaultCase", f);
     // TODO: Call mutator function
     ReturnInst::Create(ctx, ConstantInt::get(Type::getInt1Ty(ctx), true), case_0);
-    
-    // Assemble the Switch instruction
-    SwitchInst* sw = SwitchInst::Create(ConstantInt::get(Type::getInt32Ty(ctx), 0), case_default, 10, label_entry);
-    sw->addCase(ConstantInt::get(Type::getInt32Ty(ctx), 0), case_0);
-    
-    
+    sw->addCase(ConstantInt::get(Type::getInt16Ty(ctx), 0), case_0);
     
     f->dump();
-    verifyFunction(*f);
+    // verifyFunction(*f);
     
     // TODO Call function
     cout << "Initializing targets..." << endl;
     InitializeAllTargets();
-    ExecutionEngine* engine = ExecutionEngine::create(cache);
+    //ExecutionEngine* engine = ExecutionEngine::create(linker->getModule());
+    ExecutionEngine* engine = ExecutionEngine::create(sys);
     if(engine == NULL)
     {
         cerr << "Failed to create engine" << endl;
@@ -166,6 +170,23 @@ int main (int argc, char const *argv[])
         cout << "Created engine" << endl;
     }
     
+    engine->addModule(cpu);
+    engine->addModule(cache);
+    
+    // Function* cacheFunction = linker->getModule()->getFunction("game_cache");
+    Function* cacheFunction = cache->getFunction("game_cache");
+    void* pCacheFunction = engine->getPointerToFunction(cacheFunction);
+    if(!pCacheFunction)
+    {
+        cerr << "Could not get pointer to game cache function" << endl;
+        return 8;
+    } else {
+        cout << "Found game cache" << endl;
+    }
+    void (*cf)(system_t*) = (void (*)(system_t*)) pCacheFunction;
+    
+    system_t* s = (system_t*) malloc(sizeof(system_t));
+    cf(s);
     
     // TODO Write module to file
     cout << "done!" << endl;

@@ -71,30 +71,13 @@ int main (int argc, char const *argv[])
     string error;
     LLVMContext &ctx = getGlobalContext();
     Module* cpu = read_module(ctx, "sys/cpu.o", &error);
-    if(cpu == NULL)
+    Module* sys = read_module(ctx, "sys/system.o", &error);
+    if(cpu == NULL || sys == NULL)
     {
-        cerr << "Could not find CPU objects" << endl;
+        cerr << "Could not find core system objects" << endl;
         return 1;
     } else {
         cout << "Found CPU Implementation" << endl;
-    }
-    
-    Module* sys = read_module(ctx, "sys/system.o", &error);
-    if(sys == NULL)
-    {
-        cerr << "Could not find System objects" << endl;
-        return 1;
-    } else {
-        cout << "Found System Implementation" << endl;
-    }
-    
-    Function* cpu_get_pc = cpu->getFunction("cpu_get_pc");
-    if(cpu_get_pc == NULL)
-    {
-        cerr << "Could not find cpu_get_pc" << endl;
-        return 1;
-    } else {
-        cout << "Found getter for CPU Program Counter" << endl;
     }
     
     Module* cacheTemplate = read_module(ctx, "sys/game_template.o", &error);
@@ -111,26 +94,32 @@ int main (int argc, char const *argv[])
     {
         cerr << "Could not find game loop function" << endl;
         return 2;
-    } else {
-        cout << "Found game loop function" << endl;
     }
     
-    cout << "Game loop has " << game_loop->arg_size() << " arguments" << endl;
     const Type* systemType = game_loop->arg_begin()->getType();
-    if(systemType == NULL)
+    const Type* ret = game_loop->getReturnType();
+    if(systemType == NULL || ret == NULL)
     {
-        cerr << "Could not find type for game loop's argument";
+        cerr << "Could not find type info for game loop's";
         return 3;
-    } else {
-        cout << "Found type for system_t*" << endl;
-        systemType->dump();
+    }
+    
+    // Link in precompiled module bitcode
+    Linker* linker = new Linker("game", "bytecodeCache", ctx, Linker::Verbose);
+    if(linker->LinkInModule(cpu, &error))
+    {
+        cerr << "Failed to link CPU module: " << error << endl;
+        return 6;
+    }
+    if(linker->LinkInModule(sys, &error))
+    {        
+        cerr << "Failed to link System module: " << error << endl;
+        return 7;
     }
 
-    const Type* ret = game_loop->getReturnType();
-    ret->dump();
-    
     // Game Cache function, bool game_cache(state_t* state)
-    Module* cache = new Module("Game Cache", ctx);
+    Module* cache = linker->getModule();
+    
     Function* f = cast<Function>(cache->getOrInsertFunction("game_cache", Type::getIntNTy(ctx, 1), systemType, NULL));
     Argument* state = f->arg_begin();
     state->setName("state");
@@ -144,6 +133,7 @@ int main (int argc, char const *argv[])
     
     // Assemble the Switch instruction
     IRBuilder<>* b = new IRBuilder<>(label_entry);
+    Function* cpu_get_pc = cache->getFunction("cpu_get_pc");
     Value* pc = b->CreateCall(cpu_get_pc, state);
     SwitchInst* sw = b->CreateSwitch(pc, case_default, 10);
     delete b;
@@ -160,8 +150,7 @@ int main (int argc, char const *argv[])
     // TODO Call function
     cout << "Initializing targets..." << endl;
     InitializeAllTargets();
-    //ExecutionEngine* engine = ExecutionEngine::create(linker->getModule());
-    ExecutionEngine* engine = ExecutionEngine::create(sys);
+    ExecutionEngine* engine = ExecutionEngine::create(cache);
     if(engine == NULL)
     {
         cerr << "Failed to create engine" << endl;
@@ -170,10 +159,6 @@ int main (int argc, char const *argv[])
         cout << "Created engine" << endl;
     }
     
-    engine->addModule(cpu);
-    engine->addModule(cache);
-    
-    // Function* cacheFunction = linker->getModule()->getFunction("game_cache");
     Function* cacheFunction = cache->getFunction("game_cache");
     void* pCacheFunction = engine->getPointerToFunction(cacheFunction);
     if(!pCacheFunction)

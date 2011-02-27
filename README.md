@@ -14,12 +14,12 @@
  
 ## Compilation Instructions
 
-<code><pre>
-mkdir bin
-cd bin
-CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:string=/path/to/llvm/install ../src
-make all test
-</pre></code>
+<pre>
+  mkdir bin
+  cd bin
+  CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:string=/path/to/llvm/install ../src
+  make all test
+</pre>
 
 ## Anti-Piracy Statement:
 

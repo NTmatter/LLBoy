@@ -1,4 +1,4 @@
-## Based mostly on the documentation from Imran Nazar's jsgb project:
+## References
 
 - https://github.com/Two9A/jsGB
 - http://imrannazar.com/GameBoy-Emulation-in-JavaScript

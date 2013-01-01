@@ -174,7 +174,7 @@ CPU_OP(DI)
 
 // --- Load/Store operations --- //
 // ---- Register-to-Register ---- //
-// for to in a b c d e h l; do for from in a b c d e h l; do echo "LDRR($to,$from);"; done; done
+// for to in a b c d e h l; do for from in a b c d e h l; do echo "LDRR($to,$from);"; done; done | xargs -n 7
 #define LDRR(to, from) CPU_OP(LDrr_##to##from)\
 { \
     CPU_INSTRUCTION_PRE; \

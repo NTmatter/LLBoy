@@ -39,7 +39,7 @@ llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES
 	core jit linker runtimedyld analysis native
 	transformutils vectorize instcombine ipa ipo instrumentation
 	engine executionengine
-)
+    bitwriter bitreader)
 
 find_program( LLVM_CLANG clang
 	DOC "Clang binary from LLVM install"
@@ -55,4 +55,4 @@ find_program( LLVM_LINKER llvm-ld
 add_subdirectory (sys)
 
 add_executable (LLBoy main.cpp)
-target_link_libraries (LLBoy ${LLVM_LIBRARIES})
+target_link_libraries (LLBoy ${REQ_LLVM_LIBRARIES})

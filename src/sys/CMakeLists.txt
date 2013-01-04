@@ -22,7 +22,6 @@ add_custom_target(system-bitcode ALL
     SOURCES ${SYSTEM_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library (llboy ${SYSTEM_SOURCES})
 add_library (llboy_system ${SYSTEM_SOURCES})
 
 # Tests

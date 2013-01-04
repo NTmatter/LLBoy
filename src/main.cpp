@@ -21,26 +21,28 @@
 */
 
 
-#include <iostream>
+#import <iostream>
 
-#include <llvm/LLVMContext.h>
-#include <llvm/Function.h>
-#include <llvm/Module.h>
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/CallingConv.h>
-
-#include <llvm/Target/TargetData.h>
-#include <llvm/Target/TargetSelect.h>
+#import <llvm/Support/system_error.h>
+#import <llvm/LLVMContext.h>
+#import <llvm/Function.h>
+#import <llvm/Module.h>
+#import <llvm/Support/MemoryBuffer.h>
+#import <llvm/Bitcode/ReaderWriter.h>
+#import <llvm/Analysis/Verifier.h>
+#import <llvm/ExecutionEngine/ExecutionEngine.h>
+#import <llvm/ExecutionEngine/JIT.h>
+#import <llvm/CallingConv.h>
+#import <llvm/Target/TargetData.h>
+#import <llvm/Support/TargetSelect.h>
+#import <llvm/ExecutionEngine/ExecutionEngine.h>
+#import <llvm/ExecutionEngine/JIT.h>
 
 extern "C"
 {
-    #include "sys/system.h"
-    #include "sys/cpu.h"
-    #include "sys/cpu_functions_names.h"
+    #import "sys/system.h"
+    #import "sys/cpu.h"
+    #import "sys/cpu_functions_names.h"
 }
 
 using namespace std;
@@ -48,16 +50,18 @@ using namespace llvm;
 
 Module* read_module(LLVMContext* ctx, string path, string* error)
 {
+    error_code err;
     MemoryBuffer* buffer;
-    Module* out = NULL;
-    if((buffer = MemoryBuffer::getFile(path, error)))
+    OwningPtr<MemoryBuffer> mb;
+
+    err = MemoryBuffer::getFile(path, mb);
+    if(err)
     {
-        out = ParseBitcodeFile(buffer, *ctx, error);
-        delete buffer;
-    } else {
-        cerr << "Could not find file " << path << endl;
+        cerr << "Error reading bitcode file: " << err << endl;
+        return NULL;
     }
-    return out;
+
+    return ParseBitcodeFile(mb.get(), *ctx);
 }
 
 int main(int argc, char** argv)
@@ -77,7 +81,7 @@ int main(int argc, char** argv)
     
     // InitializeNativeTarget();
     // ExecutionEngine* engine = ExecutionEngine::create(module_system, false, &error);
-    InitializeAllTargets();
+    InitializeNativeTarget();
     ExecutionEngine* engine = ExecutionEngine::createJIT(module_system, &error);
     if(engine)
     {

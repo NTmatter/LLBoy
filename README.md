@@ -1,23 +1,45 @@
 # LLBoy
 
-- GameBoy emulator utilizing LLVM for emitting translated bytecode
+- GameBoy emulator utilizing LLVM for translating GameBoy bytecode to native
 - Sources at https://github.com/NTmatter/LLBoy
 - More detailed documentation at http://www.axante.net/projects/llboy
 - Based directly upon http://imrannazar.com/GameBoy-Emulation-in-JavaScript
 
 ## Dependencies:
 
-- LLVM Core 2.8 (compiled-in to generate native translation)
-- Clang 2.8 (binary only, builds LTO opcode bitcode file)
+- LLVM Core 3.2 (compiled-in to generate native translation)
+- Clang 3.2 (binary only, builds LTO opcode bitcode file)
 - CMake 2.8 (binary only, for building)
 - QT 4.7.0 (will be required later)
  
 ## Compilation Instructions
+LLVM and Clang 3.2 headers and binaries should be installed on the system. In
+some cases, the development headers will be missing, or the cmake configuration
+files may not be present. It is generally easiest to download the latest from llvm.org.
 
+To install LLVM and Clang to the location of your choosing:
 <pre>
+  # Extract llvm and clang sources
+  tar xzf llvm-3.2.src.tar.gz
+  tar xzf clang-3.2.src.tar.gz
+
+  # Move clang sources into llvm for automatic build
+  mv clang-3.2.src llvm-3.2.src/tools/clang
+
+  # Do an out-of-tree build
+  mkdir llvm-3.2.build
+  cd llvm-3.2.build
+  cmake -DCMAKE_INSTALL_PREFIX:PATH=/example/clang+llvm-3.2 ../llvm-3.2.src
+  make
+  sudo make install
+</pre>
+
+Build LLboy:
+<pre>
+  cd LLboy
   mkdir bin
   cd bin
-  CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:string=/path/to/llvm/install ../src
+  CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:path=/example/clang+llvm-3.2 ../src
   make all test
 </pre>
 

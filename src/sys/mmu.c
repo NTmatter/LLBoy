@@ -115,8 +115,8 @@ uint8_t mmu_rb(system_t* state, uint16_t addr)
     }
     
     // Certain areas of ZRAM should always return zero
-    if(addr >= 0xFEA0 && addr < 0xFF00 || addr >= 0xFF01 && addr < 0xFF04
-        || addr >= 0xFF08 && addr < 0xFF0F || addr >= 0xFF10 && addr < 0xFF40)
+    if((addr >= 0xFEA0 && addr < 0xFF00) || (addr >= 0xFF01 && addr < 0xFF04)
+        || (addr >= 0xFF08 && addr < 0xFF0F) || (addr >= 0xFF10 && addr < 0xFF40))
     {
         return 0;
     }

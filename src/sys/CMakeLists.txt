@@ -16,8 +16,8 @@ endforeach(SOURCEFILE)
 
 # Create LLVM object files for sources
 add_custom_target(system-bitcode ALL
-    COMMAND ${CLANG} -c -emit-llvm -I${CMAKE_CURRENT_SOURCE_DIR} ${SYSTEM_SOURCES_ABSOLUTE}
-    COMMAND ${LLVM_LINKER} -o llboy.bc *.o
+    COMMAND ${LLVM_CLANG} -c -O4 -emit-llvm -I${CMAKE_CURRENT_SOURCE_DIR} ${SYSTEM_SOURCES_ABSOLUTE}
+    COMMAND ${LLVM_LINKER} -link-as-library -o ${CMAKE_CURRENT_BINARY_DIR}/llboy.bc *.o
     COMMENT "Creating LLVM Bitcode objects for runtime load and optimization"
     SOURCES ${SYSTEM_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

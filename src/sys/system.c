@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include <stdlib.h>
 #include "system.h"
 #include "cpu_functions.h"
 #include "mmu_functions.h"

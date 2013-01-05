@@ -39,7 +39,8 @@ Build LLboy:
   cd LLboy
   mkdir bin
   cd bin
-  CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:path=/example/clang+llvm-3.2 ../src
+  CC=/example/clang+llvm-3.2/bin/clang CXX=/example/clang+llvm-3.2/bin/clang++ \
+     cmake -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT:path=/example/clang+llvm-3.2 ../src
   make all test
 </pre>
 

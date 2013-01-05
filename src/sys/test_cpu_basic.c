@@ -19,10 +19,12 @@
 // THE SOFTWARE.
 
 #import <assert.h>
+#import <stdlib.h>
 #import "cpu.h"
 #import "cpu_functions.h"
 #import "system.h"
 
+/// Execute a simple NOP function to sanity-check the CPU
 int main(int argc, char** argv)
 {
 	system_t* sys = (system_t*) malloc(sizeof(system_t));

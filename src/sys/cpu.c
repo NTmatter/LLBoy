@@ -119,14 +119,11 @@ void cpu_execute(system_t* state)
 // -- Ops -- //
 void cpu_op_undefined(system_t* state)
 {
-    printf("Hit unknown instruction $%x", state->cpu.pc);
     state->cpu.stop = true;
 }
 
 void cpu_op_unimplemented(system_t* state)
 {
-    printf("Hit unimplemented instruction 0x%02x at 0x%04x\n",
-        mmu_rb(state, state->cpu.pc), state->cpu.pc);
     state->cpu.halt = true;
 }
 
@@ -191,7 +188,7 @@ LDRR(l,a); LDRR(l,b); LDRR(l,c); LDRR(l,d); LDRR(l,e); LDRR(l,h); LDRR(l,l);
 #define LDRHLM(to) CPU_OP(LDrHLm_##to) \
 {\
     CPU_INSTRUCTION_PRE; \
-    uint16_t address = state->cpu.h << 8 + state->cpu.l; \
+    uint16_t address = (state->cpu.h << 8) + state->cpu.l; \
     state->cpu.to = mmu_rb(state, address); \
     state->cpu.m = 2; \
     CPU_INSTRUCTION_POST; \
@@ -203,7 +200,7 @@ LDRHLM(a); LDRHLM(b); LDRHLM(c); LDRHLM(d); LDRHLM(e); LDRHLM(h); LDRHLM(l);
 #define LDHLMR(from) CPU_OP(LDHLmr_##from)\
 {\
     CPU_INSTRUCTION_PRE; \
-    uint16_t address = state->cpu.h << 8 + state->cpu.l; \
+    uint16_t address = (state->cpu.h << 8) + state->cpu.l; \
     mmu_wb(state, address, state->cpu.from); \
     state->cpu.m = 2; \
     CPU_INSTRUCTION_POST; \

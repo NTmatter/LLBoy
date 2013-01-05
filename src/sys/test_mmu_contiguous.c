@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 #include "system.h"
 #include "mmu.h"
 #include "mmu_functions.h"
@@ -28,17 +29,13 @@
 int main (int argc, char const *argv[])
 {
     system_t* state = initialize_system();
-    uint16_t i = 0;
-    do {
+    for(uint16_t i = 0; i < 0xFFFF; i++) {
         if(i % 0x100 == 0) {
             printf("Reading 0x%04x...\n", i);
         }
-        uint32_t index = mmu_memory_offset(state, i);
-        if(index < 0) {
-            printf("Hit unimplemented memory at 0x%04x\n", i);
-            return 1;
-        }
-    } while(i++ != 0xFFFF);
+        
+        assert(mmu_memory_offset(state, i) != -1);
+    }
     
     return 0;
 }

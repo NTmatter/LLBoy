@@ -33,7 +33,6 @@
 #import <llvm/ExecutionEngine/ExecutionEngine.h>
 #import <llvm/ExecutionEngine/JIT.h>
 #import <llvm/CallingConv.h>
-#import <llvm/Target/TargetData.h>
 #import <llvm/Support/TargetSelect.h>
 #import <llvm/ExecutionEngine/ExecutionEngine.h>
 #import <llvm/ExecutionEngine/JIT.h>
@@ -41,7 +40,6 @@
 extern "C"
 {
     #import "sys/system.h"
-    #import "sys/cpu.h"
     #import "sys/cpu_functions_names.h"
 }
 
@@ -70,17 +68,17 @@ int main(int argc, char** argv)
     MemoryBuffer* buffer;
     LLVMContext* context = &(getGlobalContext());
  
-    cout << "Loading System and CPU code...";   
-    Module* module_cpu = read_module(context, "sys/cpu.o", &error);
-    if(!module_cpu) cerr << "Failed to load CPU module: " << error << endl;
-    Module* module_mmu = NULL;
-    // if(!module_mmu) cerr << "Failed to load MMU module: " << error << endl;
-    Module* module_system = read_module(context, "sys/system.o", &error);
-    if(!module_system) cerr << "Failed to load System module: " << error << endl;
-    cout << "Complete." << endl;
+    cout << "Loading System implementation bitcode...";   
+    Module* module_system = read_module(context, "sys/llboy.bc", &error);
+    if(module_system) 
+    {
+        cout << "Complete." << endl;
+    } else {
+        cerr << "Failed to load system module: " << error << endl;
+        return -1;
+    }
     
-    // InitializeNativeTarget();
-    // ExecutionEngine* engine = ExecutionEngine::create(module_system, false, &error);
+    // Create JIT for native target
     InitializeNativeTarget();
     ExecutionEngine* engine = ExecutionEngine::createJIT(module_system, &error);
     if(engine)
@@ -90,10 +88,8 @@ int main(int argc, char** argv)
         cerr << "Failed to create Execution Engine: " << error << endl;
         return -1;
     }
-    
-    engine->addModule(module_cpu);
-    
-    Function* op_ADDr_b = module_cpu->getFunction(cpu_op_names_basic[0x80]);
+
+    Function* op_ADDr_b = module_system->getFunction(cpu_op_names_basic[0x80]);
     if(op_ADDr_b)
     {
         cout << "Found ADDr_b function" << endl;
@@ -111,7 +107,7 @@ int main(int argc, char** argv)
         return -1;
     }
     
-    system_t* state = (system_t*) malloc(sizeof(system_t));
+    system_t* state = initialize_system();
     state->cpu.a = 1;
     state->cpu.b = 2;
     void (*ADDr_b)(system_t*) = (void (*)(system_t*)) p_ADDr_b;

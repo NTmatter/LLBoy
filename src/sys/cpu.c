@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <libc.h>
 
@@ -31,11 +30,6 @@
 #define CPU_OP(name) void cpu_op_##name(system_t* state)
 
 // -- Helper Functions -- //
-void cpu_hello()
-{
-    printf("Greetings from the CPU\n");
-}
-
 void cpu_initialize(cpu_t* cpu)
 {
     memset(cpu, 0, sizeof(cpu_t));

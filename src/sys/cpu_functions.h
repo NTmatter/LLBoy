@@ -26,9 +26,6 @@
 #define CPU_OP(name) void cpu_op_##name(system_t* state)
 
 // -- Helper Functions -- //
-/// Prints a simple Hello World
-void cpu_hello();
-
 /// Initializes the contents of the provided cpu structure
 void cpu_initialize(cpu_t* cpu);
 void cpu_execute(system_t* state);

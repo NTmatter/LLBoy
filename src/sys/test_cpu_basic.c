@@ -18,19 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <stdio.h>
-#include "cpu.h"
-#include "cpu_functions.h"
-#include "system.h"
+#import <assert.h>
+#import "cpu.h"
+#import "cpu_functions.h"
+#import "system.h"
 
 int main(int argc, char** argv)
 {
-    cpu_hello();
-    cpu_t* cpu = (cpu_t*) malloc(sizeof(cpu_t));
-    cpu_initialize(cpu);
-    cpu->a = 1;
+	system_t* sys = (system_t*) malloc(sizeof(system_t));
+	initialize_system(sys);
     
-    void (*op)() = (void (*)()) &cpu_hello;
-    op();
+    void (*op)(system_t*) = (void (*)()) &cpu_op_NOP;
+    op(sys);
+
+    assert(sys->cpu.pc == 1);
+
     return 0;
 }

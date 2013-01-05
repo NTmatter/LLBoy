@@ -46,7 +46,7 @@ find_program( LLVM_CLANG clang
 	PATHS ${LLVM_INSTALL_PREFIX}
 	PATH_SUFFIXES bin )
 
-find_program( LLVM_LINKER llvm-ld
+find_program( LLVM_LINK llvm-link
 	DOC "Clang binary from LLVM install"
 	PATHS ${LLVM_INSTALL_PREFIX}
 	PATH_SUFFIXES bin )

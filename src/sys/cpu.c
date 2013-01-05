@@ -343,12 +343,12 @@ CPU_OP(INCSP)
     CPU_INSTRUCTION_POST;
 }
 
-#define INCR(r) CPU_OP(INCr_##r) \
+#define INCR(reg) CPU_OP(INCr_##reg) \
 { \
     CPU_INSTRUCTION_PRE; \
     state->cpu.m = 1; \
-    state->cpu.r++; \
-    state->cpu.flags = (state->cpu.r ? 0 : CPU_FLAG_ZERO); \
+    state->cpu.reg++; \
+    state->cpu.flags = (state->cpu.reg ? 0 : CPU_FLAG_ZERO); \
     CPU_INSTRUCTION_POST; \
 }
 INCR(a); INCR(b); INCR(c); INCR(d); INCR(e); INCR(h); INCR(l);
@@ -384,12 +384,12 @@ CPU_OP(DECSP)
     CPU_INSTRUCTION_POST;
 }
 
-#define DECR(r) CPU_OP(DECr_##r) \
+#define DECR(reg) CPU_OP(DECr_##reg) \
 { \
     state->cpu.pc++; \
     state->cpu.m = 1; \
-    state->cpu.r--; \
-    state->cpu.flags = (state->cpu.r ? 0 : CPU_FLAG_ZERO); \
+    state->cpu.reg--; \
+    state->cpu.flags = (state->cpu.reg ? 0 : CPU_FLAG_ZERO); \
 }
 DECR(a); DECR(b); DECR(c); DECR(d); DECR(e); DECR(h); DECR(l);
 #undef DECR
@@ -520,7 +520,7 @@ CPU_OP(LDAIOC)
 {
     CPU_INSTRUCTION_PRE;
     state->cpu.m = 2;
-    state->cpu.a = mmu_rb(state, 0xFF00 + state->cpu.r);
+    state->cpu.a = mmu_rb(state, 0xFF00 + state->cpu.c);
     CPU_INSTRUCTION_POST;
 }
 
@@ -644,12 +644,12 @@ JR(Cn, state->cpu.flags & CPU_FLAG_CARRY);
 #undef JR
 
 // -- Comparison -- //
-#define CPR(r) CPU_OP(CPr_##r)\
+#define CPR(reg) CPU_OP(CPr_##reg)\
 {\
     CPU_INSTRUCTION_PRE; \
     state->cpu.m = 1; \
     const uint8_t i = state->cpu.a; \
-    const uint8_t m = state->cpu.r; \
+    const uint8_t m = state->cpu.reg; \
     state->cpu.a -= m; \
     state->cpu.flags = CPU_FLAG_OPERATION; \
     if(m > i) state->cpu.flags |= CPU_FLAG_CARRY; \
@@ -699,7 +699,7 @@ CPU_OP(CPn)
 CPU_OP(RLA)
 {
     CPU_INSTRUCTION_PRE;
-    state->cpu.r = 1;
+    state->cpu.m = 1;
     const uint8_t carry_in = (state->cpu.flags & CPU_FLAG_CARRY) ? 1 : 0;
     const uint8_t carry_out = (state->cpu.a & 0x80) ? CPU_FLAG_CARRY : 0;
     state->cpu.a = (state->cpu.a << 1) + carry_in;
@@ -708,14 +708,14 @@ CPU_OP(RLA)
     CPU_INSTRUCTION_POST;
 }
 
-#define RLr(r) CPU_OP(RLr_##r) \
+#define RLr(reg) CPU_OP(RLr_##reg) \
 { \
     CPU_INSTRUCTION_PRE; \
     /* CB OP */ state->cpu.pc++; \
     state->cpu.m = 2; \
     const uint8_t carry_in = (state->cpu.flags & CPU_FLAG_CARRY) ? 1 : 0; \
-    const uint8_t carry_out = (state->cpu.r & 0x80) ? CPU_FLAG_CARRY : 0; \
-    state->cpu.r = (state->cpu.r << 1) + carry_in; \
+    const uint8_t carry_out = (state->cpu.reg & 0x80) ? CPU_FLAG_CARRY : 0; \
+    state->cpu.reg = (state->cpu.reg << 1) + carry_in; \
     state->cpu.flags &= 0xEF; \
     state->cpu.flags |= carry_out; \
     CPU_INSTRUCTION_POST; \
@@ -724,11 +724,11 @@ RLr(a); RLr(b); RLr(c); RLr(d); RLr(e); RLr(h); RLr(l);
 #undef RLr
 
 // --- XOR --- //
-#define XORr(r) CPU_OP(XORr_##r) \
+#define XORr(reg) CPU_OP(XORr_##reg) \
 { \
     CPU_INSTRUCTION_PRE; \
     state->cpu.m = 1; \
-    state->cpu.a ^= state->cpu.r; \
+    state->cpu.a ^= state->cpu.reg; \
     state->cpu.flags = state->cpu.a ? 0 : CPU_FLAG_ZERO; \
     CPU_INSTRUCTION_POST; \
 }
@@ -736,12 +736,12 @@ XORr(a); XORr(b); XORr(c); XORr(d); XORr(e); XORr(h); XORr(l);
 #undef XORr
 // -- CB Ops -- //
 // --- Bit Queries --- //
-#define BITnr(n, r) CPU_OP(BIT##n##r) \
+#define BITnr(n, reg) CPU_OP(BIT##n##reg) \
 { \
     CPU_INSTRUCTION_PRE; \
     /* CB OP */ state->cpu.pc++; \
     state->cpu.flags = \
-        (state->cpu.r & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
+        (state->cpu.reg & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
         state->cpu.m = 2; \
     CPU_INSTRUCTION_POST; \
 }

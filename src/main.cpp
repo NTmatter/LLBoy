@@ -40,7 +40,8 @@
 extern "C"
 {
     #import "sys/system.h"
-    #import "sys/cpu_functions_names.h"
+    #import "sys/cpu_functions.h"
+    #import "cart_metadata.h"
 }
 
 using namespace std;
@@ -49,7 +50,6 @@ using namespace llvm;
 Module* read_module(LLVMContext* ctx, string path, string* error)
 {
     error_code err;
-    MemoryBuffer* buffer;
     OwningPtr<MemoryBuffer> mb;
 
     err = MemoryBuffer::getFile(path, mb);
@@ -65,7 +65,6 @@ Module* read_module(LLVMContext* ctx, string path, string* error)
 int main(int argc, char** argv)
 {
     string error;
-    MemoryBuffer* buffer;
     LLVMContext* context = &(getGlobalContext());
  
     cout << "Loading System implementation bitcode...";   
@@ -89,7 +88,8 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    Function* op_ADDr_b = module_system->getFunction(cpu_op_names_basic[0x80]);
+    // Find a function and get a pointer to it. Use ADDr_b for testing (ra += rb)
+    Function* op_ADDr_b = module_system->getFunction(cpu_op_metadata_basic[0x80].name);
     if(op_ADDr_b)
     {
         cout << "Found ADDr_b function" << endl;
@@ -107,6 +107,7 @@ int main(int argc, char** argv)
         return -1;
     }
     
+    // Sanity check of retrieved function pointer
     system_t* state = initialize_system();
     state->cpu.a = 1;
     state->cpu.b = 2;

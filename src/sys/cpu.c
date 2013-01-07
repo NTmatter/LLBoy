@@ -90,16 +90,15 @@ void cpu_rrs(system_t* state)
 /// This should probably be absorbed into the code generator
 void cpu_execute(system_t* state)
 {
-    uint8_t opcode;
     void (*op)(system_t*);
     
     // Fetch op implementation from appropriate table
-    opcode = mmu_rb(state, state->cpu.pc);
+    uint8_t opcode = mmu_rb(state, state->cpu.pc);
     if(opcode == 0xCB) {
         opcode = mmu_rb(state, ++state->cpu.pc);
-        op = cpu_ops_cb[opcode];
+        op = cpu_op_metadata_cb[opcode].impl;
     } else {
-        op = cpu_ops_basic[opcode];
+        op = cpu_op_metadata_basic[opcode].impl;
     }
     
     // Execute operation against current state

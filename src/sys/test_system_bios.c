@@ -42,9 +42,9 @@ int main (int argc, char const *argv[])
         if(opcode == 0xCB) {
             opcode = mmu_rb(state, ++state->cpu.pc);
             printf("%02X\n", opcode);
-            op = cpu_ops_cb[opcode];
+            op = cpu_op_metadata_cb[opcode].impl;
         } else {
-            op = cpu_ops_basic[opcode];
+            op = cpu_op_metadata_basic[opcode].impl;
             printf("\n");
         }
         assert(op != cpu_op_NOP);

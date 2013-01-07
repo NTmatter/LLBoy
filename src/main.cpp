@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     }
 
     // Find a function and get a pointer to it. Use ADDr_b for testing (ra += rb)
-    Function* op_ADDr_b = module_system->getFunction(cpu_op_metadata_basic[0x80].name);
+    Function* op_ADDr_b = module_system->getFunction(cpu_op_metadata_basic[0x80].impl_name);
     if(op_ADDr_b)
     {
         cout << "Found ADDr_b function" << endl;

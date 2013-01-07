@@ -32,6 +32,7 @@ typedef struct {
     uint8_t opcode;
     uint8_t cycles;
     cpu_op_t impl;
+    const char* impl_name;
     uint8_t args;
     bool terminator;
 } cpu_op_metadata_s;
@@ -177,7 +178,8 @@ CPU_OP(BIT7h); CPU_OP(BIT7l); CPU_OP(BIT7m); CPU_OP(BIT7a);
 
 #define OP(opname) cpu_op_##opname
 #define OPM(op_name, op_code, op_cycles, op_impl, op_args, op_terminator) \
-{.name = #op_name, .opcode = op_code, .cycles = op_cycles, .impl = op_impl, .args = op_args, .terminator = op_terminator}
+{.name = #op_name, .opcode = op_code, .cycles = op_cycles, .args = op_args, .terminator = op_terminator, \
+    .impl = op_impl, .impl_name = #op_impl}
 
 static cpu_op_metadata_s cpu_op_metadata_basic[256] = {
     // 0x00

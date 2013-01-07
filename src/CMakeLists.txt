@@ -54,5 +54,5 @@ find_program( LLVM_LINK llvm-link
 # Core system library
 add_subdirectory (sys)
 
-add_executable (LLBoy main.cpp)
+add_executable (LLBoy main.cpp SequenceBuilder.cpp)
 target_link_libraries (LLBoy ${REQ_LLVM_LIBRARIES} llboy_system)

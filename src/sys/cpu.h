@@ -32,8 +32,8 @@
 
 typedef struct
 {
-    bool halt;
-    bool stop;
+    uint16_t pc; // Program Counter
+    uint16_t sp; // Stack Pointer
     
     uint8_t a, b, c, d, e; // General-purpose registers
     uint8_t h, l; // General-purpose registers (commonly for address registers)
@@ -43,8 +43,8 @@ typedef struct
     uint8_t r; // ? & 127
     bool ime; // Interrupt Master Enable
     
-    uint16_t pc; // Program Counter
-    uint16_t sp; // Stack Pointer
+    bool halt;
+    bool stop;
     
     struct
     {

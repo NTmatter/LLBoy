@@ -44,6 +44,8 @@ extern "C"
     #import "cart_metadata.h"
 }
 
+#import "SequenceBuilder.h"
+
 using namespace std;
 using namespace llvm;
 
@@ -67,14 +69,23 @@ int main(int argc, char** argv)
     string error;
     LLVMContext* context = &(getGlobalContext());
  
-    cout << "Loading System implementation bitcode...";   
+    cout << "Loading System implementation bitcode...";
     Module* module_system = read_module(context, "sys/llboy.bc", &error);
-    if(module_system) 
+    if(module_system)
     {
         cout << "Complete." << endl;
     } else {
         cerr << "Failed to load system module: " << error << endl;
         return -1;
+    }
+    
+    SequenceBuilder::buildFromCart(module_system, 0);
+    
+    if(SequenceBuilder::optimize(module_system))
+    {
+        cout << "Optimized module" << endl;
+    } else {
+        cout << "Module needed no optimizations" << endl;
     }
     
     // Create JIT for native target
@@ -89,6 +100,7 @@ int main(int argc, char** argv)
     }
 
     // Find a function and get a pointer to it. Use ADDr_b for testing (ra += rb)
+    cout << cpu_op_metadata_basic[0x80].impl_name << endl;
     Function* op_ADDr_b = module_system->getFunction(cpu_op_metadata_basic[0x80].impl_name);
     if(op_ADDr_b)
     {
@@ -116,5 +128,6 @@ int main(int argc, char** argv)
     cout << "Executing function 1 + 2 = " << (int)(state->cpu.a) << endl;
     ADDr_b(state);
     cout << "Executing function 3 + 2 = " << (int)(state->cpu.a) << endl;
+    
     return 0;
 }

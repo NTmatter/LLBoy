@@ -1,3 +1,5 @@
+#ifndef __LLGB_SEQUENCE_BUILDER_H
+#define __LLGB_SEQUENCE_BUILDER_H
 /*
  Copyright (c) 2012 Thomas Johnson
  
@@ -37,5 +39,7 @@ public:
     static void buildFromCart(Module* base, system_t* sys);
     
     /// Runs optimization passes on the supplied module
-    static void optimize(Module* mod);
+    static bool optimize(Module* mod);
 };
+
+#endif

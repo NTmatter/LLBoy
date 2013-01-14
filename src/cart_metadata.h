@@ -1,3 +1,5 @@
+#ifndef __LLGB_CART_METADATA_H
+#define __LLGB_CART_METADATA_H
 /*
  Copyright (c) 2011 Thomas Johnson
  
@@ -320,3 +322,4 @@ static cart_metadata_s bios_metadata[] = {
 	MD(0xFF, 0x50, true, false, false)
 };
 #undef MD
+#endif

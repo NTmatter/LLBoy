@@ -20,6 +20,7 @@
  THE SOFTWARE.
  */
 #import <iostream>
+#import <sstream>
 #import <iomanip>
 
 #import "SequenceBuilder.h"
@@ -87,21 +88,24 @@ end:
 void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
 {
     Function* execute = m->getFunction("execute");
-    BasicBlock* entry = BasicBlock::Create(m->getContext(), "entry", execute);
-    BasicBlock* finish = BasicBlock::Create(m->getContext(), "finish", execute);
-    SwitchInst* sw;
+    StructType* system_s = m->getTypeByName("struct.system_t");
+    PointerType* pSystem_s = PointerType::getUnqual(system_s);
     
-    if(execute) execute->eraseFromParent();
+    BasicBlock* entry;
+    SwitchInst* sw;
+    BasicBlock* finish;
     
     // Create Execute function from scratch
     {
-        StructType* system_s = m->getTypeByName("struct.system_t");
-        PointerType* pSystem_s = PointerType::getUnqual(system_s);
+        if(execute) execute->eraseFromParent();
+        
         FunctionType* ft = FunctionType::get(IntegerType::getInt32Ty(m->getContext()),
                                              pSystem_s,
                                              (Type*)0);
         
-        execute = m->getOrInsertFunction("execute", ft);
+        execute = cast<Function>(m->getOrInsertFunction("execute", ft));
+        entry = BasicBlock::Create(m->getContext(), "entry", execute);
+        finish = BasicBlock::Create(m->getContext(), "finish", execute);
 
         // Populate entry block:
         //   get PC
@@ -111,65 +115,52 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
         //   return execution cycle accumulator
         
         // Create translated blocks, inserting before "finish":
-        BasicBlock* current = BasicBlock::Create(m->getContext(), "", execute, finish);
+        // BasicBlock* current = BasicBlock::Create(m->getContext(), "", execute, finish);
         // Add "current" to the switch and begin populating the block
         // On landings, create a "next" block, add an unconditional jump from previous to next
         // On terminations, create an unconditional jump to finish block, then scan for new instructions
     }
     
-    BasicBlock* b;
+    BasicBlock* b = NULL;
     // BIOS 0x0000-0x00FF
-    for(int i = 0; i < 0x100; i++)
+    for(uint32_t i = 0; i < 0x100; i++)
     {
         const cart_metadata_s md = bios_metadata[i];
-        
-        // Debugging info
-        if(md.isVisited && md.isInstruction)
-        {
-            cpu_op_metadata_s op_md = cpu_op_metadata_basic[bios[i]];
-            if(op_md.opcode == 0xCB) op_md = cpu_op_metadata_cb[bios[++i]];
-            
-            // Display op info
-            if(md.isLanding && op_md.terminator)
-            {
-                cout << "TL";
-            } else if(md.isLanding) {
-                cout << " L";
-            } else if(op_md.terminator) {
-                cout << "T ";
-            } else {
-                cout << "  ";
-            }
-            cout << setw(2) << hex << setfill('0') << i << ": " << op_md.name << "(";
-            if(op_md.args >= 1) cout << "0x" << setw(2) << hex << (unsigned int)bios[i + 1];
-            if(op_md.args == 2) cout << ", 0x" << setw(2) << hex << (unsigned int)bios[i + 2];
-            cout << ")";
-            
-            cout << endl;
-        }
         
         // Unvisited -> Unvisited: continue
         // Unvisited -> Visited: new block
         // Visited -> Visited: new block if landing or terminator.
         // Visited -> Unvisited: break, jump to end. Set previous to null.
         
+        // Emit calls for visited instructions, skipping over unknown or unvisited memory
         if(md.isVisited && md.isInstruction)
         {
+            // Build a friendly hex offset for use as labels
+            std::ostringstream offset;
+            offset << "0x" << setw(4) << hex << setfill('0') << i;
+            
+            // Offset for use in switch statement
+            ConstantInt* iOffset = ConstantInt::get(Type::getInt32Ty(m->getContext()), i);
+            
+            
             // Chain blocks together if needed for a landing instruction.
             // If there is no previous block, there is no need for chaining.
-            if(md.isLanding && b)
+            if(md.isLanding && (b != NULL))
             {
+                cout << "case " << offset.str() << ": " << endl;
+                
                 BasicBlock* previous = b;
-                b = BasicBlock::Create(m->getContext(), "", execute, finish);
-                BranchInst::Create(b, previous);
+                b = BasicBlock::Create(m->getContext(), offset.str(), execute, finish);
+                if(previous) BranchInst::Create(b, previous);
                 // Then add to switch for current offset (Beware with 0xCB instructions)
                 // sw->addCase(i, b);
             }
             
             // Ensure that a current block exists
-            if(!b)
+            if(b == NULL)
             {
-                b = BasicBlock::Create(m->getContext(), "", execute, finish);
+                cout << "case " << offset.str() << ": " << endl;
+                b = BasicBlock::Create(m->getContext(), offset.str(), execute, finish);
                 // Then add to switch for current offset (Beware with 0xCB instructions)
                 // sw->addCase(i, b);
             }
@@ -179,27 +170,38 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
             if(op_md.opcode == 0xCB) op_md = cpu_op_metadata_cb[bios[++i]];
             
             // Create call instruction
+            cout << "   " << offset.str() << ": " << op_md.name << "(";
+            if(op_md.args >= 1) cout << "0x" << setw(2) << setfill('0') << hex << (unsigned int)bios[i + 1];
+            if(op_md.args == 2) cout << ", 0x" << setw(2) << setfill('0') << hex << (unsigned int)bios[i + 2];
+            cout << ")" << endl;
+            
             Function* op = m->getFunction(op_md.impl_name);
             // CallInst::Create(op, ArrayRef<PointerType>(/* Function's sys_t argument */), "", b);
             
-            // Terminate the block if necessary
+            // Terminate the block if the instruction demands it.
             if(op_md.terminator)
             {
+                cout << "   break;" << endl;
                 BranchInst::Create(finish, b);
                 b = NULL;
             }
         }
         
-        // Moving into an unvisited region of memory. Terminate the block.
-        if(!md.isVisited && b)
+        // Moving into an unvisited region of memory terminates the block.
+        if(!md.isVisited && (b != NULL))
         {
+            cout << "   break;" << endl;
             BranchInst::Create(finish, b);
             b = NULL;
         }
     }
     
-    // Finally, finish an unterminated block if at the end of the memory region:
-    if(b) BranchInst::Create(finish, b);
+    // Terminate the block for this memory segment if the final instruction did not do so
+    if(b != NULL)
+    {
+        cout << "   break;" << endl;
+        BranchInst::Create(finish, b);
+    }
     
     // Reserved Memory 0x0000-0x00FF
     

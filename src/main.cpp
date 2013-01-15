@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         return -1;
     }
     
-    SequenceBuilder::buildFromCart(module_system, 0);
+    SequenceBuilder::buildFromCart(module_system, initialize_system());
     
     if(SequenceBuilder::optimize(module_system))
     {

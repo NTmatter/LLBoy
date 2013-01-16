@@ -94,6 +94,8 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
     BasicBlock* entry;
     SwitchInst* sw;
     BasicBlock* finish;
+    Value* pc = ConstantInt::get(m->getContext(), APInt(32, 0));
+    Value* systemPointerArgument;
     
     // Create Execute function from scratch
     {
@@ -111,8 +113,20 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
         //   get PC
         //   create execution cycle accumulator
         //   create switch(pc) defaulting to exit block
+        
+        Argument* argSystemPointer = execute->getArgumentList().begin();
+        argSystemPointer->setName("sys");
+        
+        // Copy the System pointer from first argument, and retrieve its value
+        AllocaInst* copyOfArgument = new AllocaInst(argSystemPointer->getType(), "", entry);
+        StoreInst* storeCopyOfArgument = new StoreInst(argSystemPointer, copyOfArgument, false, entry);
+        systemPointerArgument = cast<Value>(new LoadInst(copyOfArgument, "systemPointerArgument", false, entry));
+        
+        sw = SwitchInst::Create(pc, finish, 0, entry);
+        
         // Populate finish block
         //   return execution cycle accumulator
+        ReturnInst::Create(m->getContext(), ConstantInt::get(m->getContext(), APInt(32, 0)), finish);
         
         // Create translated blocks, inserting before "finish":
         // BasicBlock* current = BasicBlock::Create(m->getContext(), "", execute, finish);
@@ -153,7 +167,7 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
                 b = BasicBlock::Create(m->getContext(), offset.str(), execute, finish);
                 if(previous) BranchInst::Create(b, previous);
                 // Then add to switch for current offset (Beware with 0xCB instructions)
-                // sw->addCase(i, b);
+                sw->addCase(iOffset, b);
             }
             
             // Ensure that a current block exists
@@ -162,7 +176,7 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
                 cout << "case " << offset.str() << ": " << endl;
                 b = BasicBlock::Create(m->getContext(), offset.str(), execute, finish);
                 // Then add to switch for current offset (Beware with 0xCB instructions)
-                // sw->addCase(i, b);
+                sw->addCase(iOffset, b);
             }
             
             // Retrieve metadata about the currently-selected op
@@ -176,7 +190,7 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
             cout << ")" << endl;
             
             Function* op = m->getFunction(op_md.impl_name);
-            // CallInst::Create(op, ArrayRef<PointerType>(/* Function's sys_t argument */), "", b);
+            CallInst::Create(op, ArrayRef<Value*>(systemPointerArgument), "", b);
             
             // Terminate the block if the instruction demands it.
             if(op_md.terminator)
@@ -208,6 +222,7 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
     // Built-in ROM bank 0x0000-0x3FFF
     
     // Switchable ROM bank 0x4000-0x7FFF
+    m->dump();
 }
 
 bool SequenceBuilder::optimize(Module* m)

@@ -84,6 +84,7 @@ int main(int argc, char** argv)
     if(SequenceBuilder::optimize(module_system))
     {
         cout << "Optimized module" << endl;
+        module_system->dump();
     } else {
         cout << "Module needed no optimizations" << endl;
     }
@@ -128,6 +129,14 @@ int main(int argc, char** argv)
     cout << "Executing function 1 + 2 = " << (int)(state->cpu.a) << endl;
     ADDr_b(state);
     cout << "Executing function 3 + 2 = " << (int)(state->cpu.a) << endl;
+    
+    // Try to execute the first bit of the bios
+    cout << "Calling game's execute function..." << endl;
+    system_t* state2 = initialize_system();
+    Function* executeFunction = module_system->getFunction("execute");
+    uint32_t (*execute)(system_t*) = (uint32_t (*)(system_t*)) engine->getPointerToFunction(executeFunction);
+    uint32_t cycles = execute(state2);
+    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << endl;
     
     return 0;
 }

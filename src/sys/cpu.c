@@ -626,12 +626,11 @@ CPU_OP(JPHL)
 { \
     CPU_INSTRUCTION_PRE; \
     state->cpu.m = 2; \
+    int8_t offset = (int8_t) mmu_rb(state, state->cpu.pc++); \
     if(test) \
     { \
-        state->cpu.pc += (int8_t) mmu_rb(state, state->cpu.pc); \
+        state->cpu.pc += offset; \
         state->cpu.m++; \
-    } else { \
-        state->cpu.pc++; \
     } \
     CPU_INSTRUCTION_POST; \
 }

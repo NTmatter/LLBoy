@@ -738,7 +738,9 @@ XORr(a); XORr(b); XORr(c); XORr(d); XORr(e); XORr(h); XORr(l);
 { \
     CPU_INSTRUCTION_PRE; \
     /* CB OP */ state->cpu.pc++; \
-    state->cpu.flags = \
+    state->cpu.flags &= 0x1F; \
+    state->cpu.flags |= 0x20; \
+    state->cpu.flags |= \
         (state->cpu.reg & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
         state->cpu.m = 2; \
     CPU_INSTRUCTION_POST; \
@@ -746,9 +748,11 @@ XORr(a); XORr(b); XORr(c); XORr(d); XORr(e); XORr(h); XORr(l);
 #define BITnm(n) CPU_OP(BIT##n##m) \
 { \
     CPU_INSTRUCTION_PRE; \
-    state->cpu.pc++; \
+    /* CB OP */ state->cpu.pc++; \
     const uint16_t addr = (state->cpu.h << 8) + state->cpu.l; \
-    state->cpu.flags = \
+    state->cpu.flags &= 0x1F; \
+    state->cpu.flags |= 0x20; \
+    state->cpu.flags |= \
         (mmu_rb(state, addr) & (1 << n)) ? 0 : CPU_FLAG_ZERO; \
         state->cpu.m = 3; \
     CPU_INSTRUCTION_POST; \

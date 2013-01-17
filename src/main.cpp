@@ -136,7 +136,9 @@ int main(int argc, char** argv)
     Function* executeFunction = module_system->getFunction("execute");
     uint32_t (*execute)(system_t*) = (uint32_t (*)(system_t*)) engine->getPointerToFunction(executeFunction);
     uint32_t cycles = execute(state2);
-    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << endl;
+    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
+    cycles = execute(state2);
+    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
     
     return 0;
 }

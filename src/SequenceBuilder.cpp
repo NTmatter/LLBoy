@@ -94,7 +94,6 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
     BasicBlock* entry;
     SwitchInst* sw;
     BasicBlock* finish;
-    Value* pc = ConstantInt::get(m->getContext(), APInt(32, 0));
     Value* systemPointerArgument;
     
     // Create Execute function from scratch
@@ -122,7 +121,23 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
         StoreInst* storeCopyOfArgument = new StoreInst(argSystemPointer, copyOfArgument, false, entry);
         systemPointerArgument = cast<Value>(new LoadInst(copyOfArgument, "systemPointerArgument", false, entry));
         
-        sw = SwitchInst::Create(pc, finish, 0, entry);
+        // Extract sys->cpu*
+        std::vector<Value*> gep_indices;
+        gep_indices.push_back(ConstantInt::get(m->getContext(), APInt(8*sizeof(void*), 0)));
+        gep_indices.push_back(ConstantInt::get(m->getContext(), APInt(32, 0))); // Index into structure
+        GetElementPtrInst* sys_cpu_gep = GetElementPtrInst::Create(argSystemPointer, gep_indices, "", entry);
+        
+        StructType* cpu_ty = m->getTypeByName("struct.cpu_t");
+        PointerType* pCpu_ty = PointerType::getUnqual(cpu_ty);
+        AllocaInst* allocateCpuPointer = new AllocaInst(pCpu_ty, "", entry);
+        StoreInst* storeCpuPointer = new StoreInst(sys_cpu_gep, allocateCpuPointer, entry);
+        LoadInst* cpuPointer = new LoadInst(allocateCpuPointer, "", entry);
+        
+        // Extract cpu.pc
+        GetElementPtrInst* cpu_pc_gep = GetElementPtrInst::Create(cpuPointer, gep_indices, "", entry);
+        LoadInst* loadPC = new LoadInst(cpu_pc_gep, "", entry);
+        
+        sw = SwitchInst::Create(loadPC, finish, 0, entry);
         
         // Populate finish block
         //   return execution cycle accumulator
@@ -154,7 +169,7 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
             offset << "0x" << setw(4) << hex << setfill('0') << i;
             
             // Offset for use in switch statement
-            ConstantInt* iOffset = ConstantInt::get(Type::getInt32Ty(m->getContext()), i);
+            ConstantInt* iOffset = ConstantInt::get(Type::getInt16Ty(m->getContext()), i);
             
             
             // Chain blocks together if needed for a landing instruction.

@@ -30,8 +30,6 @@
 #import <llvm/Support/MemoryBuffer.h>
 #import <llvm/Bitcode/ReaderWriter.h>
 #import <llvm/Analysis/Verifier.h>
-#import <llvm/ExecutionEngine/ExecutionEngine.h>
-#import <llvm/ExecutionEngine/JIT.h>
 #import <llvm/CallingConv.h>
 #import <llvm/Support/TargetSelect.h>
 #import <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -73,28 +71,31 @@ int main(int argc, char** argv)
     Module* module_system = read_module(context, "sys/llboy.bc", &error);
     if(module_system)
     {
-        cout << "Complete." << endl;
+        cout << "done." << endl;
     } else {
         cerr << "Failed to load system module: " << error << endl;
         return -1;
     }
     
     SequenceBuilder::buildFromCart(module_system, initialize_system());
+    // module_system->dump();
     
+    cout << "Optimizing module...";
     if(SequenceBuilder::optimize(module_system))
     {
-        cout << "Optimized module" << endl;
-        module_system->dump();
+        cout << "done." << endl;
+        // module_system->dump();
     } else {
         cout << "Module needed no optimizations" << endl;
     }
     
     // Create JIT for native target
+    cout << "Creating execution engine...";
     InitializeNativeTarget();
     ExecutionEngine* engine = ExecutionEngine::createJIT(module_system, &error);
     if(engine)
     {
-        cout << "Execution Engine created" << endl;
+        cout << "done." << endl;
     } else {
         cerr << "Failed to create Execution Engine: " << error << endl;
         return -1;
@@ -136,9 +137,19 @@ int main(int argc, char** argv)
     Function* executeFunction = module_system->getFunction("execute");
     uint32_t (*execute)(system_t*) = (uint32_t (*)(system_t*)) engine->getPointerToFunction(executeFunction);
     uint32_t cycles = execute(state2);
-    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
-    cycles = execute(state2);
-    cout << "Completed in " << cycles << " cycles. PC is currently at " << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
+    cout << "Completed in " << cycles << " cycles. PC is currently at " << hex << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
+    cout << "Long run...";
+    for(int i = 0; i < 0x10000; i++)
+    {
+        execute(state2);
+        if(state2->cpu.pc != 0x07)
+        {
+            cout << hex << state2->cpu.pc << endl;
+        }
+        
+        if(state2->cpu.pc == 0xa6) break;
+    }
+    cout << "Completed in " << cycles << " cycles. PC is currently at " << hex << state2->cpu.pc << ". Uptime is " << dec << state2->cpu.clock.m << " cycles" << endl;
     
     return 0;
 }

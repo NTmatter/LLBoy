@@ -237,7 +237,6 @@ void SequenceBuilder::buildFromCart(Module* m, system_t* sys)
     // Built-in ROM bank 0x0000-0x3FFF
     
     // Switchable ROM bank 0x4000-0x7FFF
-    m->dump();
 }
 
 bool SequenceBuilder::optimize(Module* m)

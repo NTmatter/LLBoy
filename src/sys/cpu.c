@@ -329,7 +329,7 @@ SUBR(a); SUBR(b); SUBR(c); SUBR(d); SUBR(e); SUBR(h); SUBR(l);
     CPU_INSTRUCTION_PRE; \
     state->cpu.m = 1; \
     state->cpu.y++; \
-    if(!state->cpu.y) state->cpu.x++; \
+    if(state->cpu.y == 0) state->cpu.x++; \
     CPU_INSTRUCTION_POST; \
 }
 INC(B, C, b, c); INC(D, E, d, e); INC(H, L, h, l);
